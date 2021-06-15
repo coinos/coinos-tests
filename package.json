@@ -1,0 +1,13 @@
+{
+  "name": "coinos-tests",
+  "version": "0.0.1",
+  "description": "Automated QA/integration testing for coinos",
+  "scripts": {
+    "test": "tape test.js | tap-spec"
+  },
+  "devDependencies": {
+    "puppeteer": "^10.0.0",
+    "tape": "^5.2.2",
+    "tap-spec": "^5.0.0"
+  }
+}
