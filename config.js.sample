@@ -1,3 +1,4 @@
 module.exports = {
-  baseUrl : 'https://dev.coinos.io/'
+  baseUrl : 'https://dev.coinos.io/',
+  email : 'testing@coinos.io'
 }

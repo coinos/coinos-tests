@@ -126,3 +126,38 @@ test('Can change username and password', async t => {
   await browser.close()
   t.end()
 })
+
+
+test('Can register an account', async t => {
+  const [browser,page] = await openCoinosHome() 
+
+  const registerAccountButtonSpan = await page.$x("//span[contains(., 'Register An Account')]")
+  await registerAccountButtonSpan[0].click()
+  await delay(2) 
+
+  const userName = 'penguinfan' + Math.floor(Math.random() * (99999999 - 1000) + 1000)
+  await page.keyboard.type( userName )
+  await page.keyboard.press('Tab')
+  await page.keyboard.type( config.email )
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await page.keyboard.type('anarchocapitalist')
+  await delay(2) 
+
+  const registerButtonSpan = await page.$x("//span[contains(., 'Register')]")
+  await registerButtonSpan[0].click()
+  await delay(3) 
+
+  let body = await page.evaluate(() => document.body.innerHTML )
+  t.ok(body.search('No payments yet') > -1, `Anonymous account created OK (displays "No payments yet")`)
+  t.ok(body.search('0.00') > -1, 'New account page shows a 0.00 balance')
+
+  const pathname = await page.evaluate(() => window.location.pathname)
+  t.equals(pathname, '/home', 'resulting URL pathname is /home')
+  
+  t.ok(body.search(userName) > -1, `The new user is logged in (userName is displayed on page)`)
+  
+  await delay(1) 
+  await browser.close()
+  t.end() 
+})
