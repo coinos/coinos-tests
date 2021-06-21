@@ -1,3 +1,5 @@
+const config = require('./config')
+
 const test = require('tape')
 const puppeteer = require('puppeteer')
 
@@ -8,7 +10,7 @@ const openCoinosHome = async () => {
   return new Promise(async resolve => {
     const browser = await puppeteer.launch( {headless: false, defaultViewport: null } )
     const page = await browser.newPage()
-    await page.goto(`https://dev.coinos.io/`, {waitUntil: 'networkidle2'})
+    await page.goto(config.baseUrl, {waitUntil: 'networkidle2'})
     resolve([browser,page])
   })
 }
@@ -84,7 +86,7 @@ test('Can change username and password', async t => {
   await delay(2)
 
   body = await page.evaluate(() => document.body.innerText )
-  t.ok(body.search('https://dev.coinos.io/' + userName) > -1, `Username updated successfully`)
+  t.ok(body.search(config.baseUrl + userName) > -1, `Username updated successfully`)
 
   await delay(4)
 
