@@ -44,3 +44,51 @@ test('Can create an anonymous account', async t => {
 
   t.end()
 })
+
+
+test('Can change username and password', async t => {
+  const [browser,page] = await openCoinosHome() 
+    
+  await delay(3) 
+  
+  const anonButtonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
+  await anonButtonSpan[0].click()
+
+  await delay(3) 
+  
+  const userButtonSpan = await page.$x("//span[contains(., 'satoshi')]")
+  await userButtonSpan[0].click()
+  await delay(1) 
+
+  const settingsDiv = await page.$x("//div[contains(., 'Settings')]")
+  await settingsDiv[5].click()
+  
+  await delay(4) 
+  
+  let body = await page.evaluate(() => document.body.innerText )
+  t.ok(body.search('Your public page') > -1, `Setting page loads OK (shows 'Your public page')")`)
+
+  await page.focus('input')
+
+  await page.evaluate( () => document.getElementsByTagName("input")[0].value = "")
+  await delay(2)
+
+  //create a new user account with a randomized ending so as to ensure (not guaranteed) unique: 
+  const userName = 'penguinfan' + Math.floor(Math.random() * (99999999 - 1000) + 1000)
+  await page.keyboard.type( userName )
+  await delay(1)
+
+  const saveSpan = await page.$x("//span[contains(., 'Save')]")
+  await saveSpan[0].click()
+
+  await delay(2)
+
+  body = await page.evaluate(() => document.body.innerText )
+  t.ok(body.search('https://dev.coinos.io/' + userName) > -1, `Username updated successfully`)
+
+  await delay(4)
+
+  await browser.close()
+
+  t.end()
+})
