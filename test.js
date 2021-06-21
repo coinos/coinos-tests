@@ -58,7 +58,7 @@ test('Can change username and password', async t => {
 
   await delay(3) 
   
-  const userButtonSpan = await page.$x("//span[contains(., 'satoshi')]")
+  let userButtonSpan = await page.$x("//span[contains(., 'satoshi')]")
   await userButtonSpan[0].click()
   await delay(1) 
 
@@ -90,7 +90,39 @@ test('Can change username and password', async t => {
 
   await delay(4)
 
-  await browser.close()
+  const passButtonSpan = await page.$x("//span[contains(., 'Change Password')]")
+  await passButtonSpan[0].click()
 
+  await page.keyboard.type('anarchocapitalist')
+  await page.keyboard.press("Tab")
+  await page.keyboard.type('anarchocapitalist')
+  await delay(1)
+
+  await saveSpan[0].click()
+  await delay(2)
+
+  //now logout and try logging in with the new creds: 
+  userButtonSpan = await page.$x(`//span[contains(., ${userName})]`)
+  await userButtonSpan[0].click()
+  await delay(1) 
+  const signoutButton = await page.$x("//button[contains(., 'Sign Out')]")
+  await signoutButton[0].click()
+  await delay(4) 
+
+  body = await page.evaluate(() => document.body.innerText )
+  t.ok(body.search('Send and receive bitcoin') > -1, `Signed out ok (we are now back to default message)`)
+
+  await page.focus('input')
+  await page.keyboard.type(userName)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type('anarchocapitalist')
+  await page.keyboard.press("Enter")
+  await delay(2) 
+
+  body = await page.evaluate(() => document.body.innerText )
+  t.ok(body.search('No payments yet') > -1, `Logged back in OK with the updated credentials`)
+  await delay(1) 
+  
+  await browser.close()
   t.end()
 })
