@@ -161,3 +161,69 @@ test('Can register an account', async t => {
   await browser.close()
   t.end() 
 })
+
+test('Cannot register account if input fields are invalid', async t => {
+  const clickRegister = async () => {
+    return new Promise(async resolve => {
+      const registerButtonSpan = await page.$x("//span[contains(., 'Register')]")
+      await registerButtonSpan[0].click()
+      await delay(2) 
+      resolve()
+    })
+  }
+  
+  const [browser,page] = await openCoinosHome() 
+  const userName = 'bruinsfan' + Math.floor(Math.random() * (99999999 - 1000) + 1000)
+
+  await page.goto(config.baseUrl + 'register', {waitUntil: 'networkidle2'})
+
+  //### skip username ### 
+  await page.keyboard.press('Tab') //< where username normally would go
+  await page.keyboard.type( config.email )
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  await page.keyboard.type('anarchocapitalist')
+  await clickRegister()
+
+  let body = await page.evaluate(() => document.body.innerHTML )
+  t.ok(body.search('Name is required') > -1, `User is warned that 'Name is required'`)
+  t.ok(body.search('Email is required') === -1, `User not warned about email since that was entered OK`)
+  
+  let pathname = await page.evaluate(() => window.location.pathname)
+  t.equals(pathname, '/register', 'user was prevented from registering (URL did not change)')
+
+  //### skip email ### 
+  await page.goto(config.baseUrl + 'register', {waitUntil: 'networkidle2'})
+
+  await page.keyboard.type( userName )  
+  await page.keyboard.press('Tab') //< where email would go 
+  await page.keyboard.press('Tab')
+  await page.keyboard.type('anarchocapitalist')
+  await clickRegister()
+
+  body = await page.evaluate(() => document.body.innerHTML )
+  t.ok(body.search('Name is required') === -1, `User is not warned about name since that was entered OK'`)
+  t.ok(body.search('Email is required') > -1, `User is warned that 'Email is required'`)
+  pathname = await page.evaluate(() => window.location.pathname)
+  t.equals(pathname, '/register', 'user was prevented from registering (URL did not change)')
+
+  //### invalid email ### 
+  await page.goto(config.baseUrl + 'register', {waitUntil: 'networkidle2'})
+
+  await page.keyboard.type( userName )  
+  await page.keyboard.press('Tab') 
+  await page.keyboard.type( 'zfsdfasdfasdf' ) //< jibberish email
+  await page.keyboard.press('Tab') 
+  await page.keyboard.press('Tab') //< skip phone
+  await page.keyboard.type('anarchocapitalist')
+  await clickRegister()
+
+  body = await page.evaluate(() => document.body.innerHTML )
+  t.ok(body.search('E-mail must be valid') > -1, `User is warned that 'Email must be valid'`)
+  pathname = await page.evaluate(() => window.location.pathname)
+  t.equals(pathname, '/register', 'user was prevented from registering (URL did not change)')
+
+  await delay(1) 
+  await browser.close()
+  t.end() 
+})
