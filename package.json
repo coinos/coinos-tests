@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "Automated QA/integration testing for coinos",
   "scripts": {
-    "test": "tape test.js | tap-spec"
+    "test": "tape test.js | tap-spec",
+    "test-headless" : "tape test.js --headless | tap-spec"
   },
   "devDependencies": {
     "puppeteer": "^10.0.0",

@@ -8,5 +8,5 @@ jobs:
     - uses: actions/checkout@v1
     - name: Run NPM target
       uses: anna-money/github-actions-npm@v2
-      #with:
-        #target: 'custom-target'  # Remove `with` section to run default target `test`
+      with:
+        target: 'test-headless'
