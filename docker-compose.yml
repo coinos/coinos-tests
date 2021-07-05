@@ -1,0 +1,14 @@
+version: '3.6'
+services:
+  coinos-tests:
+    container_name: coinos-tests
+    image: drschwabe/coinos-tests
+    volumes:
+      - ./:/coinos-tests
+    command : npm run test-headless
+    environment:
+    - BASE_URL=http://ui:8085/
+networks: 
+  default: 
+    external: 
+      name: coinos 

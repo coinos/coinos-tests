@@ -1,5 +1,7 @@
 const argv = require('minimist')(process.argv.slice(2))
 const config = require('./config')
+//ENV var can override config: 
+const baseUrl = process.env.BASE_URL ? process.env.BASE_URL : config.baseUrl
 
 const test = require('tape')
 const puppeteer = require('puppeteer')
@@ -12,10 +14,19 @@ const delay = async seconds =>
 const openCoinosHome = async () => {
   const opts = {
     headless: headless, 
-    timeout : 60000, 
+    timeout : 60000,
+    args: [ 
+      "--disabled-setupid-sandbox",
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
+      '--disable-setuid-sandbox',
+      '--no-first-run',
+      '--no-sandbox',
+      '--no-zygote'   
+    ]
   }
   if(headless) {
-    opts.args =  [`--window-size=1600,900`] 
+    opts.args.push('--window-size=1600,900')
   } else {
     opts.defaultViewport = null
   }
@@ -23,7 +34,7 @@ const openCoinosHome = async () => {
     const browser = await puppeteer.launch( opts )
     const page = await browser.newPage()
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36')
-    await page.goto(config.baseUrl, {
+    await page.goto(baseUrl, {
       waitUntil: 'networkidle2',
     })
     resolve([browser,page])
@@ -99,7 +110,7 @@ test('Can change username and password', async t => {
   await delay(2)
 
   body = await page.evaluate(() => document.body.innerText )
-  t.ok(body.search(config.baseUrl + userName) > -1, `Username updated successfully`)
+  t.ok(body.search(baseUrl + userName) > -1, `Username updated successfully`)
 
   await delay(4)
 
@@ -192,7 +203,7 @@ test('Cannot register account if input fields are invalid', async t => {
   const [browser,page] = await openCoinosHome() 
   const userName = 'bruinsfan' + Math.floor(Math.random() * (99999999 - 1000) + 1000)
 
-  await page.goto(config.baseUrl + 'register', {waitUntil: 'networkidle2'})
+  await page.goto(baseUrl + 'register', {waitUntil: 'networkidle2'})
   await delay(3) 
 
   //### skip username ### 
@@ -211,7 +222,7 @@ test('Cannot register account if input fields are invalid', async t => {
   t.equals(pathname, '/register', 'user was prevented from registering (URL did not change)')
 
   //### skip email ### 
-  await page.goto(config.baseUrl + 'register', {waitUntil: 'networkidle2'})
+  await page.goto(baseUrl + 'register', {waitUntil: 'networkidle2'})
 
   await page.keyboard.type( userName )  
   await page.keyboard.press('Tab') //< where email would go 
@@ -226,7 +237,7 @@ test('Cannot register account if input fields are invalid', async t => {
   t.equals(pathname, '/register', 'user was prevented from registering (URL did not change)')
 
   //### invalid email ### 
-  await page.goto(config.baseUrl + 'register', {waitUntil: 'networkidle2'})
+  await page.goto(baseUrl + 'register', {waitUntil: 'networkidle2'})
 
   await page.keyboard.type( userName )  
   await page.keyboard.press('Tab') 
