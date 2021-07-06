@@ -1,12 +1,12 @@
-on: push
-name: Test Workflow
+on: [ push, pull_request ]
+name: Coinos
 jobs:
-  runNpmTarget:
-    name: Run NPM target
+  runTests:
+    container : drschwabe/coinos-tests:latest
+    name: Headless Puppeteer Integration Test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Run NPM target
-      uses: anna-money/github-actions-npm@v2
-      with:
-        target: 'test-headless'
+    - uses: actions/checkout@v2
+    - name : coinos-tests
+      run : npm run test-headless
+

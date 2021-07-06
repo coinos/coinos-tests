@@ -5,7 +5,6 @@ services:
     image: drschwabe/coinos-tests
     volumes:
       - ./:/coinos-tests
-    command : npm run test-headless
     environment:
     - BASE_URL=http://ui:8085/
 networks: 
