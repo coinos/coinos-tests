@@ -1,4 +1,3 @@
-version: '3.6'
 services:
   coinos-tests:
     container_name: coinos-tests
