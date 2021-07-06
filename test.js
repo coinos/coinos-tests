@@ -1,7 +1,11 @@
 const argv = require('minimist')(process.argv.slice(2))
-const config = require('./config')
 //ENV var can override config: 
-const baseUrl = process.env.BASE_URL ? process.env.BASE_URL : config.baseUrl
+let baseUrl 
+if(process.env.BASE_URL) {
+  baseUrl = process.env.BASE_URL 
+} else {
+  baseUrl = require('./config').baseUrl
+}
 
 const test = require('tape')
 const puppeteer = require('puppeteer')
