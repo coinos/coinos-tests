@@ -3,11 +3,13 @@ name: Coinos
 jobs:
   installAndTest:
     name: Install Coinos and run integration test
+#    container : drschwabe/coinos-tests:latest
     runs-on: ubuntu-latest
-    env: 
-      DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-    steps:
+    steps: #required for act: 
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+        
     - run: npm install -g yarn
 
     # - uses: actions/checkout@v2
@@ -22,10 +24,21 @@ jobs:
         repository: coinos/coinos-server
         path: coinos-server
 
+    - name: Install sudo (act only)
+      run: apt update && apt install sudo
+      if: env.ACT=='true'
+
+    - run: |
+        curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+      name: install docker-compose (act only)
+      if: env.ACT=='true'
+
     - run: |
         sudo curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
-      name: install docker-compose 
+      name: sudo install docker-compose 
+      if: env.ACT!='true'      
 
     - run : | 
         #yarn
@@ -55,14 +68,19 @@ jobs:
       with:
         path: coinos-tests
 
-    - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
-      name: Login to DockerHub
+    # - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+    #   name: Login to DockerHub
 
     #- run: cd coinos-tests && docker-compose build 
       #name: Build test docker image 
 
    # - run : cd coinos-tests && docker-compose up --force-recreate
-    #- run : cd coinos-tests && docker-compose up
+    #- run : cd coinos-tests
+    - run : docker-compose up
+      working-directory: coinos-tests
+
+    #- run : ls 
+    #- run :  docker-compose up
     #- run : cd coinos-tests && docker-compose run coinos-tests "npm run test-headless"
     #- run: cd coinos-tests && docker-compose run coinos-tests
       #name : Test
@@ -81,6 +99,8 @@ jobs:
     # - uses: docker://drschwabe/coinos-tests:latest
     # - with: 
     #     run : cd coinos-tests && npm run test-headless
+    #   env : 
+    #     BASE_URL : http://ui:8085        
 
     # - run : cd coinos-tests && npm run test-headless
     #   name : perform coinos-tests
