@@ -2,8 +2,11 @@ on: [ push, pull_request ]
 name: Coinos
 jobs:
   installAndTest:
-    name: Install Coinos and perform integration test
+    name: Install Coinos and run integration test
     runs-on: ubuntu-latest
+    env: 
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
     steps:
     - run: npm install -g yarn
 
@@ -19,40 +22,67 @@ jobs:
         repository: coinos/coinos-server
         path: coinos-server
 
-    - run: sudo curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-    - run: sudo chmod +x /usr/local/bin/docker-compose
+    - run: |
+        sudo curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+      name: install docker-compose 
 
     - run : | 
-        #yarn \
-        ls \
-        && echo '------------------------------------------' \
-        && cd coinos-server \
-        && ls \
-        && cp -rf sampleconfig "./config" \
-        && cp .env.sample ".env" \
-        && cp fx.sample "fx" \
-        && mkdir "mysql" \
-        && ls \
-        && cp db/schema.sql "mysql/"
+        #yarn
+        cd coinos-server 
+        cp -rf sampleconfig "./config" 
+        cp .env.sample ".env" 
+        cp fx.sample "fx" 
+        mkdir "mysql" 
+        cp db/schema.sql "mysql/"
       name : install and setup coinos-server
+
     - run : |
-        #docker-compose rm -v \
-        cd coinos-server \
-        && docker-compose up -d --force-recreate --remove-orphans maria \
-        && sleep 10 \
-        && docker exec -i mariadb mysql --host 127.0.0.1 --port 3306 --protocol=tcp -ppassword < mysql/schema.sql
+        cd coinos-server
+        docker-compose up -d --force-recreate --remove-orphans maria
+        sleep 10
+        docker exec -i mariadb mysql --host 127.0.0.1 --port 3306 --protocol=tcp -ppassword < mysql/schema.sql
       name: setup maria schema 
 
     - run: |
-        cd coinos-server \
-        &&  docker-compose down \
-        &&  docker-compose up -d
+        cd coinos-server
+        docker-compose down
+        docker-compose up -d
       name: docker-compose down and up 
-    
-#    - uses: actions/checkout@v2
-    - uses: docker://drschwabe/coinos-tests:latest
 
-    - run : cd coinos-tests && npm run test-headless
-      name : perform coinos-tests
-      env : 
-        BASE_URL : http://ui:8085
+    - uses: actions/checkout@v2
+      name: checkout coinos-tests
+      with:
+        path: coinos-tests
+
+    - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      name: Login to DockerHub
+
+    #- run: cd coinos-tests && docker-compose build 
+      #name: Build test docker image 
+
+   # - run : cd coinos-tests && docker-compose up --force-recreate
+    #- run : cd coinos-tests && docker-compose up
+    #- run : cd coinos-tests && docker-compose run coinos-tests "npm run test-headless"
+    #- run: cd coinos-tests && docker-compose run coinos-tests
+      #name : Test
+
+    
+    # - uses: addnab/docker-run-action@v3
+    #   name : test-headless
+    # - with : 
+    #     image: drschwabe/coinos-tests:latest
+    #     shell: bash 
+
+        # run : |
+        #   cd "coinos-tests"
+        #   npm run test-headless
+    # - name: coinos-tests docker 
+    # - uses: docker://drschwabe/coinos-tests:latest
+    # - with: 
+    #     run : cd coinos-tests && npm run test-headless
+
+    # - run : cd coinos-tests && npm run test-headless
+    #   name : perform coinos-tests
+    #   env : 
+    #     BASE_URL : http://ui:8085
