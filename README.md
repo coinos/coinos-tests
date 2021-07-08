@@ -1,18 +1,27 @@
 # coinos-tests
 
-Tested with NodeJS 16
+Integration test for helping to maintain the stability of features in [Coinos]
 
-### install/run (local)
+## setup options
+
+There are 2 ways to install & run the test: 
+- direct (local) which will run the test directly via Node (`npm test`). 
+- via [act] (and [docker]) which allows you to skip the npm install by instead pulling an image/building/running a container with said npm install and environment ready to go (can only run headless)
+
+By default, both ways will test against your local instance of [coinos-server] (`http://localhost:8085`) 
+So first, follow the instructions to install & bring that online (ie- concluding with `docker-compose up`)
+
+
+Optionally cp `config.js.sample` to `config.js` and change `baseUrl` to point to a different coinos URL ie- an instance in the cloud (noting the required trailing slash)
+
+### install/run (direct)
 
 ```bash
 git clone https://github.com/coinos/coinos-tests
 cd coinos-tests
 npm install
-cp config.js.sample config.js
 npm test
 ```
-
-if necessary, change `baseUrl` (noting the required slash at the end) in `config.js` to your own instance
 
 To test headless ie- terminal only; without a Chromium window spawning - instead do: 
 
@@ -20,23 +29,17 @@ To test headless ie- terminal only; without a Chromium window spawning - instead
 npm run test-headless
 ```
 
-### install/run (docker)
+### install/run (act + docker)
 
-Alternatively, the test can be run in a docker container for the purpose of CI
-Requires [docker] and [docker-compose]
-
-First, start [coinos-server] (using network name 'coinos')
+Install [act] on your system (which also requires docker) and then: 
 
 ```bash
 git clone https://github.com/coinos/coinos-tests
 cd coinos-tests
-npm install
-docker-compose up
+npm run test-act
 ```
-The final step will download the necessary image from Dockerhub, build it, and run test-headless against your live instance of coinos-server 
 
-To customize the docker build ie- to reflect changes to the Dockerfile run `docker build . --no-cache` tthen edit `docker-compose.yml` `image` value with the resulting image ID from your build. 
-
+[Coinos]: https://github.com/coinos
+[act]: https://github.com/nektos/act
 [docker]: https://docs.docker.com/get-docker
-[docker-compose]: https://docs.docker.com/compose/install/
 [coinos-server]: https://github.com/coinos/coinos-server
