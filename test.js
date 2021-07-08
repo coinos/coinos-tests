@@ -1,5 +1,5 @@
 console.log(`###### Coinos Integration Test ######
----------------------------------------------`)
+-------------------------------------`)
 
 // ### configuration setup ###
 // Parse terminal params: 
@@ -10,9 +10,7 @@ const headless = argv.headless ? true : false
 let config 
 try { 
   config = config = require('./config')
-} catch(err) {
-  console.log('no config file, reverting to env or hardcoded variables')
-}
+} catch {}; 
 
 let baseUrl = config && config.baseUrl ? config.baseUrl : 'http://localhost:8085/'
 let email = config && config.email ? config.email : 'hello@coinos.io'
@@ -20,6 +18,9 @@ let email = config && config.email ? config.email : 'hello@coinos.io'
 //ENV var can override config: 
 if(process.env.BASE_URL) baseUrl = process.env.BASE_URL
 if(process.env.EMAIL) email -= process.env.EMAIL 
+
+console.log(`targeting: ${baseUrl}
+using email: ${email}`)
 // ###### 
 
 // ### Deps ###
