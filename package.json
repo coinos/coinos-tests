@@ -1,12 +1,11 @@
 {
   "name": "coinos-tests",
-  "version": "0.0.1",
-  "description": "Automated QA/integration testing for coinos",
+  "version": "0.0.2",
+  "description": "Integration test for Coinos",
   "scripts": {
     "test": "tape test.js | tap-spec",
     "test-headless" : "tape test.js --headless | tap-spec",
-    "down" : "docker-compose down;  cd ../coinos-server; docker-compose down;",
-    "docker-krm" : "docker kill $(docker ps -q); docker rm $(docker ps -a -q);"
+    "test-act" : "act --workflows ./action-test.yml --job runTestLocal"
   },
   "devDependencies": {
     "puppeteer": "^10.0.0",

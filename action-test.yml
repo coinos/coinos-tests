@@ -1,0 +1,11 @@
+### act action file (emulates Github Actions) ###
+
+jobs:
+  runTestLocal:
+    container: drschwabe/coinos-tests:v2
+    name: Headless Puppeteer Integration Test (Local)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name : coinos-tests
+      run : npm run test-headless
