@@ -2,23 +2,25 @@
 
 Integration test for helping to maintain the stability of features in [Coinos]
 
-## setup options
+## setup
 
 There are 2 ways to install & run the test: 
 - direct (local) which will run the test directly via Node (`npm test`). 
 - via [act] (and [docker]) which allows you to skip the npm install by instead pulling an image/building/running a container with said npm install and environment ready to go (can only run headless)
 
 By default, both ways will test against your local instance of [coinos-server] (`http://localhost:8085`) 
-So first, follow the instructions to install & bring that online (ie- concluding with `docker-compose up`)
-
+So first, follow the instructions to install & bring that online separately (ie- concluding with `docker-compose up`) then from a fresh location do: 
+```
+git clone https://github.com/coinos/coinos-tests
+cd coinos-tests
+```
 
 Optionally cp `config.js.sample` to `config.js` and change `baseUrl` to point to a different coinos URL ie- an instance in the cloud (noting the required trailing slash)
 
 ### install/run (direct)
 
 ```bash
-git clone https://github.com/coinos/coinos-tests
-cd coinos-tests
+
 npm install
 npm test
 ```
@@ -34,8 +36,6 @@ npm run test-headless
 Install [act] on your system (which also requires docker) and then: 
 
 ```bash
-git clone https://github.com/coinos/coinos-tests
-cd coinos-tests
 npm run test-act
 ```
 
