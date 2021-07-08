@@ -4,7 +4,9 @@
   "description": "Automated QA/integration testing for coinos",
   "scripts": {
     "test": "tape test.js | tap-spec",
-    "test-headless" : "tape test.js --headless | tap-spec"
+    "test-headless" : "tape test.js --headless | tap-spec",
+    "down" : "docker-compose down;  cd ../coinos-server; docker-compose down;",
+    "docker-krm" : "docker kill $(docker ps -q); docker rm $(docker ps -a -q);"
   },
   "devDependencies": {
     "puppeteer": "^10.0.0",
