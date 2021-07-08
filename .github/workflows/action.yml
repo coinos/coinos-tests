@@ -10,5 +10,5 @@ jobs:
     - name : coinos-tests
       run : npm run test-headless
       env : 
-        BASE_URL : http://ui:8085 
+        BASE_URL : http://localhost:8085/
 
