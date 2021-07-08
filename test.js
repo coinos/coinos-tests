@@ -1,20 +1,35 @@
+console.log(`###### Coinos Integration Test ######
+---------------------------------------------`)
+
+// ### configuration setup ###
+// Parse terminal params: 
 const argv = require('minimist')(process.argv.slice(2))
-//ENV var can override config: 
-let baseUrl 
-if(process.env.BASE_URL) {
-  baseUrl = process.env.BASE_URL 
-} else {
-  baseUrl = require('./config').baseUrl
+const headless = argv.headless ? true : false 
+
+// Acquire other necessary variables from env or config file: 
+let config 
+try { 
+  config = config = require('./config')
+} catch(err) {
+  console.log('no config file, reverting to env or hardcoded variables')
 }
 
+let baseUrl = config && config.baseUrl ? config.baseUrl : 'http://localhost:8085/'
+let email = config && config.email ? config.email : 'hello@coinos.io'
+
+//ENV var can override config: 
+if(process.env.BASE_URL) baseUrl = process.env.BASE_URL
+if(process.env.EMAIL) email -= process.env.EMAIL 
+// ###### 
+
+// ### Deps ###
 const test = require('tape')
 const puppeteer = require('puppeteer')
-
-const headless = argv.headless ? true : false 
 
 const delay = async seconds => 
   await new Promise(r => setTimeout(r, seconds ? seconds * 1000 : 1000 ))
 
+// Function to setup/launch Puppeteer and open Coinos homepage: 
 const openCoinosHome = async () => {
   const opts = {
     headless: headless, 
@@ -44,6 +59,8 @@ const openCoinosHome = async () => {
     resolve([browser,page])
   })
 }
+
+// ### Tests ###
 
 test('Can open homepage', async t => {
   const [browser,page] = await openCoinosHome() 
@@ -167,7 +184,7 @@ test.skip('Can register an account', async t => {
   const userName = 'penguinfan' + Math.floor(Math.random() * (99999999 - 1000) + 1000)
   await page.keyboard.type( userName )
   await page.keyboard.press('Tab')
-  await page.keyboard.type( config.email )
+  await page.keyboard.type( email )
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await page.keyboard.type('anarchocapitalist')
@@ -212,7 +229,7 @@ test('Cannot register account if input fields are invalid', async t => {
 
   //### skip username ### 
   await page.keyboard.press('Tab') //< where username normally would go
-  await page.keyboard.type( config.email )
+  await page.keyboard.type( email )
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
   await page.keyboard.type('anarchocapitalist')
