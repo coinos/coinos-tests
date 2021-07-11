@@ -17,7 +17,7 @@ let email = config && config.email ? config.email : 'hello@coinos.io'
 
 //ENV var can override config: 
 if(process.env.BASE_URL) baseUrl = process.env.BASE_URL
-if(process.env.EMAIL) email -= process.env.EMAIL 
+if(process.env.EMAIL) email = process.env.EMAIL 
 
 console.log(`targeting: ${baseUrl}
 using email: ${email}`)
