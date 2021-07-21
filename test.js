@@ -27,6 +27,7 @@ using email: ${email}`);
 // ### Deps ###
 const test = require("tape");
 const puppeteer = require("puppeteer");
+const _coin = require('undercoin'); 
 
 const delay = async (seconds) =>
   await new Promise((r) => setTimeout(r, seconds ? seconds * 1000 : 1000));
@@ -339,3 +340,49 @@ test("Cannot register account if input fields are invalid", async (t) => {
   await browser.close();
   t.end();
 });
+
+test('Bitcoin, Lightning, and Liquid payment addresses are generated', async t => {
+  const [browser,page] = await openCoinosHome() 
+  await delay(3) 
+
+  const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
+  await buttonSpan[0].click()
+  await delay(6) 
+
+  const body = await page.evaluate(() => document.body.innerText )
+
+  t.ok(body.search('No payments yet') > -1, `Anonymous account created OK (displays "No payments yet")`)
+  t.ok(body.search('0.00') > -1, 'New account page shows a 0.00 balance')
+  await delay(2) 
+
+  //test payment addresses: 
+
+  await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
+
+  const lightningBtn = await page.$x("//button[contains(., 'Lightning')]")
+  await lightningBtn[0].click()
+  await delay(1) 
+  const lightningAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML) 
+  t.equal(lightningAddress.length, 263, 'Lightning address generated is 263 characters')  
+
+  await delay(2) 
+
+  const liquidBtn = await page.$x("//button[contains(., 'Liquid')]")
+  await liquidBtn[0].click()
+  await delay(1) 
+  const liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML) 
+  t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')   
+
+  await delay(2) 
+
+  const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
+  await bitcoinBtn[0].click()
+  await delay(1) 
+  const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML) 
+  t.ok(_coin.isSegwit(bitcoinAddress), 'Bitcoin address generated is a valid Segwit address') 
+
+  await delay(2) 
+
+  await browser.close()
+  t.end()
+})
