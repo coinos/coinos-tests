@@ -15,5 +15,9 @@
   "dependencies": {
     "minimist": "^1.2.5",
     "puppeteer-select": "^1.0.3"
+    "puppeteer": "^10.0.0",
+    "tape": "^5.2.2",
+    "tap-spec": "^5.0.0",
+    "undercoin": "0.0.5-b"
   }
 }
