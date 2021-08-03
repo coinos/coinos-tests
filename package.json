@@ -4,12 +4,15 @@
   "description": "Integration test for Coinos",
   "scripts": {
     "test": "tape test.js | tap-spec",
-    "test-headless" : "tape test.js --headless | tap-spec",
-    "test-act" : "act --workflows ./action-test.yml --job runTestLocal"
+    "test-headless": "tape test.js --headless | tap-spec",
+    "test-act": "act --workflows ./action-test.yml --job runTestLocal"
   },
   "devDependencies": {
-    "puppeteer": "^10.0.0",
-    "tape": "^5.2.2",
-    "tap-spec": "^5.0.0"
+    "puppeteer": "^10.1.0",
+    "tap-spec": "^5.0.0",
+    "tape": "^5.3.0"
+  },
+  "dependencies": {
+    "minimist": "^1.2.5"
   }
 }
