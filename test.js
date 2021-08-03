@@ -27,6 +27,7 @@ using email: ${email}`);
 // ### Deps ###
 const test = require("tape");
 const puppeteer = require("puppeteer");
+const select = require("puppeteer-select");
 
 const delay = async (seconds) =>
   await new Promise((r) => setTimeout(r, seconds ? seconds * 1000 : 1000));
@@ -358,6 +359,66 @@ test("Cannot register account if input fields are invalid", async (t) => {
   t.end();
 });
 
-test("Top-right menu is correct", async t () => {
-    
+test("Top-right menu is correct (logged off)", async (t) => {
+    const [browser, page] = await openCoinosHome();
+
+    // ABOUT button
+    let body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("About") > -1,
+        `About button can be found`
+    );
+
+    const aboutButton = await select(page).getElement('button:contains(About)');
+    await aboutButton.click();
+    await delay(3);
+    let host = await page.evaluate(() => window.location.host);
+    t.equals(
+        host,
+        "corporate.coinos.io",
+        "About button sends user to corporate.coinos.io"
+    );
+
+    // go back to main page
+    await page.goto(baseUrl, {
+        waitUntil: "networkidle2",
+    });
+
+    // LOGIN button
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("Login") > -1,
+        `Login button can be found`
+    );
+
+    const loginButton = await select(page).getElement('button:contains(Login)');
+    await loginButton.click();
+    await delay(2);
+    let pathname = await page.evaluate(() => window.location.pathname);
+    t.equals(
+        pathname,
+        "/login",
+        "Login button sends user to login page."
+    );
+
+    // REGISTER button
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("Register") > -1,
+        `Register button can be found`
+    );
+
+    const registerButton = await select(page).getElement('button:contains(Register)');
+    await registerButton.click();
+    await delay(2);
+    pathname = await page.evaluate(() => window.location.pathname);
+    t.equals(
+        pathname,
+        "/register",
+        "Register button sends user to register page."
+    );
+
+    await delay(1);
+    await browser.close();
+    t.end();
 });

@@ -13,6 +13,7 @@
     "tape": "^5.3.0"
   },
   "dependencies": {
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.5",
+    "puppeteer-select": "^1.0.3"
   }
 }
