@@ -7,17 +7,11 @@
     "test-headless": "tape test.js --headless | tap-spec",
     "test-act": "act --workflows ./action-test.yml --job runTestLocal"
   },
-  "devDependencies": {
-    "puppeteer": "^10.1.0",
-    "tap-spec": "^5.0.0",
-    "tape": "^5.3.0"
-  },
   "dependencies": {
-    "minimist": "^1.2.5",
-    "puppeteer-select": "^1.0.3"
-    "puppeteer": "^10.0.0",
-    "tape": "^5.2.2",
+    "puppeteer": "^10.1.0",
+    "puppeteer-select": "^1.0.3",
     "tap-spec": "^5.0.0",
+    "tape": "^5.3.0",
     "undercoin": "0.0.5-b"
   }
 }
