@@ -424,6 +424,97 @@ test("Top-right menu is correct (logged off)", async (t) => {
     t.end();
 });
 
+test("Top-right menu is correct (logged on, non-referred)", async (t) => {
+    const [browser, page] = await openCoinosHome();
+
+    // log into anonymous account
+    const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]");
+    await buttonSpan[0].click();
+    await delay(5);
+
+    let body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(body.search("No payments yet") > -1, `Anonymous account created OK (displays "No payments yet")`);
+
+    // go to admin page (I'm not admin, so there aren't any non-menu butons to intefere with my searches)
+    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"});
+
+    // open menu
+    t.ok(body.search("satoshi") > -1, "User menu button present");
+
+    let beforeLocation = await page.evaluate(() => window.location.href);
+    let menuSpan = await page.$x("//span[contains(., 'satoshi')]");
+    await menuSpan[0].click();
+    await delay(1);
+    let afterLocation = await page.evaluate(() => window.location.href);
+
+    t.equals(afterLocation, beforeLocation, "Opening menu should not redirect user.");
+
+    // ABOUT button
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("About") > -1,
+        `About button can be found`
+    );
+
+    const aboutSpan = await page.$x("//div[contains(., 'About')]");
+    await aboutSpan[5].click();
+    await delay(3);
+    let host = await page.evaluate(() => window.location.host);
+    t.equals(
+        host,
+        "corporate.coinos.io",
+        "About button sends user to corporate.coinos.io"
+    );
+
+    // go back to main page
+    await page.goto(baseUrl + "admin", {
+        waitUntil: "networkidle2",
+    });
+    menuSpan = await page.$x("//span[contains(., 'satoshi')]");
+    await menuSpan[0].click();
+    await delay(1);
+
+    // LOGIN button
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("Settings") > -1,
+        `Settings button can be found`
+    );
+
+    const settingsDiv = await page.$x("//div[contains(., 'Settings')]");
+    await settingsDiv[5].click();
+    await delay(2);
+    let pathname = await page.evaluate(() => window.location.pathname);
+    t.equals(
+        pathname,
+        "/settings",
+        "Settings button sends user to settings page."
+    );
+
+    // SIGN OUT button
+    menuSpan = await page.$x("//span[contains(., 'satoshi')]");
+    await menuSpan[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("Sign Out") > -1,
+        `Sign Out button can be found`
+    );
+
+    const logoutDiv = await page.$x("//div[contains(., 'Sign Out')]");
+    await logoutDiv[4].click();
+    await delay(2);
+    body = await page.evaluate(() => document.body.innerHTML);
+
+    t.ok(body.search("satoshi") === -1, `Sign Out button logs out user`);
+
+    // end test
+    await delay(1);
+    await browser.close();
+    t.end();
+});
+
 test('Bitcoin, Lightning, and Liquid payment addresses are generated', async t => {
   const [browser,page] = await openCoinosHome() 
   await delay(3) 
