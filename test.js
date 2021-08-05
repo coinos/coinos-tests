@@ -198,6 +198,129 @@ test("Can change username and password", async (t) => {
   t.end();
 });
 
+test("Can set, change and remove PIN", async (t) => {
+    const [browser, page] = await openCoinosHome();
+
+    // create account and go to settings page
+    const anonButtonSpan = await page.$x(
+        "//span[contains(., 'Use Anonymously')]"
+    );
+    await anonButtonSpan[0].click();
+    await delay(3);
+
+    const userButtonSpan = await page.$x("//span[contains(., 'satoshi')]");
+    await userButtonSpan[0].click();
+    await delay(1);
+    const settingsDiv = await page.$x("//div[contains(., 'Settings')]");
+    await settingsDiv[5].click();
+    await delay(4);
+
+    let body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("Your public page") > -1,
+        `Setting page loads OK (shows 'Your public page')")`
+    );
+
+    // try to set a PIN
+    let pinButtonSpan = await page.$x("//span[contains(., 'Set PIN')]");
+    await pinButtonSpan[0].click();
+
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("857142");
+    await delay(1);
+    await page.keyboard.type("142857");
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("PIN mismatch") > -1,
+        `Cannot set PIN when confirmation != original`
+    );
+
+    await page.keyboard.type("857142");
+    await delay(1);
+    await page.keyboard.type("857142");
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("PIN Set Successfully!") > -1,
+        `Can set PIN`
+    );
+
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+
+    // try to change PIN
+    pinButtonSpan = await page.$x("//span[contains(., 'Change PIN')]");
+    await pinButtonSpan[0].click();
+
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("142857");
+    await delay(1);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("Wrong PIN, try again") > -1,
+        `Current PIN is required to change PIN`
+    );
+
+    // try to change it correctly
+    await page.keyboard.type("857142");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.keyboard.down("Shift");
+    for (var i = 0; i < 7; i++)
+        await page.keyboard.press("Tab");
+    await page.keyboard.up("Shift");
+    await page.keyboard.type("142857");
+    await page.keyboard.type("142857");
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("PIN Set Successfully!") > -1,
+        `Can change PIN`
+    );
+
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+
+    // try to unset PIN
+    pinButtonSpan = await page.$x("//span[contains(., 'Change PIN')]");
+    await pinButtonSpan[0].click();
+
+    await page.keyboard.press("Tab");
+    await page.keyboard.type("142857");
+    await delay(1);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    // I need to press tab 7 times due to a bug in the system
+    for (i = 0; i < 7; i++)
+        await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("PIN Set Successfully!") > -1,
+        `Can unset PIN`
+    );
+
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+
+    await delay(1);
+    await browser.close();
+    t.end();
+});
+
 test.skip("Can register an account", async (t) => {
   const [browser, page] = await openCoinosHome();
   await delay(6);
