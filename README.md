@@ -17,6 +17,8 @@ cd coinos-tests
 
 Optionally cp `config.js.sample` to `config.js` and change `baseUrl` to point to a different coinos URL ie- an instance in the cloud (noting the required trailing slash)
 
+The server you are testing must have a precreated account.  Its username and password can be set in the config, but they are `test_admin` and `SetASecurePasswordHere` by default.  This account must have admin privileges and at least 1000 sats (0.000 01 BTC).
+
 ### install/run (direct)
 
 ```bash

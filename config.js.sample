@@ -1,4 +1,6 @@
 module.exports = {
   baseUrl : 'https://dev.coinos.io/',
-  email : 'testing@coinos.io'
+  email : 'testing@coinos.io',
+  adminUsername : 'test_admin',
+  adminPassword : 'SetASecurePasswordHere'
 }

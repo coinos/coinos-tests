@@ -15,10 +15,14 @@ try {
 let baseUrl =
   config && config.baseUrl ? config.baseUrl : "http://localhost:8085/";
 let email = config && config.email ? config.email : "hello@coinos.io";
+let adminUsername = config && config.adminUsername ? config.adminUsername : "test_admin";
+let adminPassword = config && config.adminPassword ? config.adminPassword : "SetASecurePasswordHere";
 
 //ENV var can override config:
 if (process.env.BASE_URL) baseUrl = process.env.BASE_URL;
 if (process.env.EMAIL) email = process.env.EMAIL;
+if (process.env.ADMIN_USERNAME) adminUsername = process.env.ADMIN_USERNAME;
+if (process.env.ADMIN_PASSWORD) adminUsername = process.env.ADMIN_PASSWORD;
 
 console.log(`targeting: ${baseUrl}
 using email: ${email}`);
@@ -528,3 +532,107 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated', async t =
   await browser.close()
   t.end()
 })
+
+test("Can perform internal transfers", async t => {
+    const [browser, page] = await openCoinosHome();
+
+    // register an account without money
+    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"});
+    const username =
+          "vikingfan" + Math.floor(Math.random() * (999999999999 - 1000) + 1000);
+    const password = Math.floor(Math.random() * (999999999999 - 1000) + 1000).toString();
+    await page.keyboard.type(username);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(password);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+
+    // login on account with money
+    await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"});
+    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"});
+    await page.keyboard.type(adminUsername);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(adminPassword);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    // try to send money from rich to poor
+    const amount = Math.floor(Math.random() * 1000);
+
+    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"});
+    await page.keyboard.type(username);
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.click("input");
+    await delay(1);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(amount.toString());
+    await page.keyboard.down("Shift");
+    await page.keyboard.press("Tab");
+    await page.keyboard.up("Shift");
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    let sendBtn = await page.$x("//button[contains(., 'Send')]");
+    await sendBtn[0].click();
+    await delay(1);
+
+    let body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("Payment sent!") > -1,
+        "User able to send payment"
+    );
+
+    // go to other account and check if money was received
+    await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"});
+    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"});
+    await page.keyboard.type(username);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(password);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.goto(baseUrl + "home", {waitUntil: "networkidle2"});
+
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search(amount.toString()) > -1,
+        "Money sent to account"
+    );
+
+    // send the money back, so my tester doesn't run out of money
+    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"});
+    await page.keyboard.type(adminUsername);
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.click("input");
+    await delay(1);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(amount.toString());
+    await page.keyboard.down("Shift");
+    await page.keyboard.press("Tab");
+    await page.keyboard.up("Shift");
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    sendBtn = await page.$x("//button[contains(., 'Send')]");
+    await sendBtn[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(
+        body.search("Payment sent!") > -1,
+        "User able to return money"
+    );
+    t.ok(
+        body.search("0</div>") > -1,
+        "Returned money was deducted from user's account"
+    );
+
+    await delay(1);
+    await browser.close();
+    t.end();
+});
