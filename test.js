@@ -487,7 +487,7 @@ test("Cannot register account if input fields are invalid", async (t) => {
   t.end();
 });
 
-test('Bitcoin, Lightning, and Liquid payment addresses are generated', async t => {
+test('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
   const [browser,page] = await openCoinosHome() 
   await delay(3) 
 
@@ -495,7 +495,7 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated', async t =
   await buttonSpan[0].click()
   await delay(6) 
 
-  const body = await page.evaluate(() => document.body.innerText )
+  let body = await page.evaluate(() => document.body.innerText )
 
   t.ok(body.search('No payments yet') > -1, `Anonymous account created OK (displays "No payments yet")`)
   t.ok(body.search('0.00') > -1, 'New account page shows a 0.00 balance')
@@ -529,6 +529,40 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated', async t =
 
   await delay(2) 
 
+  // go to a new account
+  await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
+  const username =
+        "vikingfan" + Math.floor(Math.random() * (999999999999 - 1000) + 1000)
+  const password = Math.floor(Math.random() * (999999999999 - 1000) + 1000).toString()
+  await page.keyboard.type(username)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(password)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+
+  // Test that all addresses work internally
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(lightningAddress)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Lightning address should be detected as coinos user')
+
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(liquidAddress)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Liquid address should be detected as coinos user')
+
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(bitcoinAddress)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Bitcoin address should be detected as coinos user')
+
+  await delay(2)
   await browser.close()
   t.end()
 })
