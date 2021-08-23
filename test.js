@@ -565,10 +565,9 @@ test("Can perform internal transfers", async t => {
     await page.keyboard.press("Enter");
     await delay(1);
     await page.click("input");
-    await delay(1);
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await page.keyboard.type(amount.toString());
+    await delay(0.5);
+    let numpadInput = (await page.$$("input"))[1];
+    await numpadInput.type(amount.toString());
     await page.keyboard.down("Shift");
     await page.keyboard.press("Tab");
     await page.keyboard.up("Shift");
@@ -608,10 +607,9 @@ test("Can perform internal transfers", async t => {
     await page.keyboard.press("Enter");
     await delay(1);
     await page.click("input");
-    await delay(1);
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await page.keyboard.type(amount.toString());
+    await delay(0.5);
+    numpadInput = (await page.$$("input"))[1];
+    await numpadInput.type(amount.toString());
     await page.keyboard.down("Shift");
     await page.keyboard.press("Tab");
     await page.keyboard.up("Shift");
@@ -628,7 +626,7 @@ test("Can perform internal transfers", async t => {
         "User able to return money"
     );
     t.ok(
-        body.search("0</div>") > -1,
+        body.search(/0\s*<\/div>/) > -1,
         "Returned money was deducted from user's account"
     );
 
