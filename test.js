@@ -569,19 +569,19 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
 
   await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
 
-  const liquidBtn = await page.$x("//button[contains(., 'Liquid')]")
-  await liquidBtn[0].click()
-  await delay(1)
-  const liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
-  t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')
-
-  await delay(2)
-
   const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
   await bitcoinBtn[0].click()
   await delay(1)
   const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
   t.ok(_coin.isSegwit(bitcoinAddress), 'Bitcoin address generated is a valid Segwit address')
+
+  await delay(2)
+
+  const liquidBtn = await page.$x("//button[contains(., 'Liquid')]")
+  await liquidBtn[0].click()
+  await delay(1)
+  const liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+  t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')
 
   await delay(2)
 
@@ -634,6 +634,20 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
 
   // Test that all addresses work internally
   await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(bitcoinAddress)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Bitcoin address should be detected as coinos user')
+
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(liquidAddress)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Liquid address should be detected as coinos user')
+
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
   await page.keyboard.type(lightningAddress)
   await page.keyboard.press("Enter")
   await delay(1)
@@ -647,20 +661,6 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
   body = await page.evaluate(() => document.body.innerText)
   t.ok(body.search(/Sending to.*satoshi/) > -1, 'Lightning invoice should be detected as coinos user')
   t.ok(body.search("10") > -1, 'Amount in invoice detected correctly')
-
-  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-  await page.keyboard.type(liquidAddress)
-  await page.keyboard.press("Enter")
-  await delay(1)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Liquid address should be detected as coinos user')
-
-  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-  await page.keyboard.type(bitcoinAddress)
-  await page.keyboard.press("Enter")
-  await delay(1)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Bitcoin address should be detected as coinos user')
 
   await delay(2)
   await browser.close()
