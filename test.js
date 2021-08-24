@@ -70,9 +70,28 @@ const openCoinosHome = async () => {
   });
 };
 
+const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+const numChars = characters.length;
+const randomCredentialLength = 12;
+const defaultPasswordPrefix = "P@s$w0rd-";
+
+// generate random username and password
+// the two use the same random data - so I can still access the accounts after a test
+// (e.g. if a test fails and I sent sats to one of those accounts; I can get them back)
+// DO NOT USE THIS FOR A REAL ACCOUNT
+function randomCredentials(usernamePrefix) {
+    let randomText = '';
+    for (var i = 0; i < randomCredentialLength; i++) {
+        randomText += characters.charAt(Math.floor(Math.random() * numChars));
+    }
+    let username = usernamePrefix + randomText;
+    let password = defaultPasswordPrefix + randomText;
+    return [username, password];
+}
+
 // ### Tests ###
 
-test.skip("Can open homepage", async (t) => {
+test("Can open homepage", async (t) => {
   const [browser, page] = await openCoinosHome();
   await delay(3);
 
@@ -86,7 +105,7 @@ test.skip("Can open homepage", async (t) => {
   t.end();
 });
 
-test.skip("Can create an anonymous account", async (t) => {
+test("Can create an anonymous account", async (t) => {
   const [browser, page] = await openCoinosHome();
   await delay(3);
 
@@ -107,7 +126,7 @@ test.skip("Can create an anonymous account", async (t) => {
   t.end();
 });
 
-test.skip("Can change username and password", async (t) => {
+test("Can change username and password", async (t) => {
   const [browser, page] = await openCoinosHome();
 
   await delay(3);
@@ -142,8 +161,7 @@ test.skip("Can change username and password", async (t) => {
   await delay(2);
 
   //create a new user account with a randomized ending so as to ensure (not guaranteed) unique:
-  const userName =
-    "penguinfan" + Math.floor(Math.random() * (99999999 - 1000) + 1000);
+  const [ userName, password ] = randomCredentials("penguinfan-");
   await page.keyboard.type(userName);
   await delay(1);
 
@@ -202,7 +220,7 @@ test.skip("Can change username and password", async (t) => {
   t.end();
 });
 
-test.skip("Can set, change and remove PIN", async (t) => {
+test("Can set, change and remove PIN", async (t) => {
     const [browser, page] = await openCoinosHome();
 
     // create account and go to settings page
@@ -335,8 +353,7 @@ test.skip("Can register an account", async (t) => {
   await registerAccountButtonSpan[0].click();
   await delay(6);
 
-  const userName =
-    "penguinfan" + Math.floor(Math.random() * (99999999 - 1000) + 1000);
+  const [ userName, password ] = randomCredentials("penguinfan-");
   await page.keyboard.type(userName);
   await page.keyboard.press("Tab");
   await page.keyboard.type(email);
@@ -372,7 +389,7 @@ test.skip("Can register an account", async (t) => {
   t.end();
 });
 
-test.skip("Cannot register account if input fields are invalid", async (t) => {
+test("Cannot register account if input fields are invalid", async (t) => {
   const clickRegister = async () => {
     return new Promise(async (resolve) => {
       const registerButtonSpan = await page.$x(
@@ -385,8 +402,7 @@ test.skip("Cannot register account if input fields are invalid", async (t) => {
   };
 
   const [browser, page] = await openCoinosHome();
-  const userName =
-    "bruinsfan" + Math.floor(Math.random() * (99999999 - 1000) + 1000);
+  const [ userName, password ] = randomCredentials("bruinsfan-");
 
   await page.goto(baseUrl + "register", { waitUntil: "networkidle2" });
   await delay(3);
@@ -510,9 +526,7 @@ test("Can refer users", async (t) => {
 
     await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"});
     await page.goto(baseUrl + "register", {waitUntil: "networkidle2"});
-    const username =
-          "want2bereferred" + Math.floor(Math.random() * (999999999999 - 1000) + 1000);
-    const password = Math.floor(Math.random() * (999999999999 - 1000) + 1000).toString();
+    const [ username, password ] = randomCredentials("want2bereferred-");
     await page.keyboard.type(username);
     await page.keyboard.press("Tab");
     await page.keyboard.type(password);
@@ -537,7 +551,7 @@ test("Can refer users", async (t) => {
     t.end();
 });
 
-test.skip('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
+test('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
   const [browser,page] = await openCoinosHome()
   await delay(3)
 
@@ -610,9 +624,7 @@ test.skip('Bitcoin, Lightning, and Liquid payment addresses are generated and pr
 
   // go to a new account
   await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
-  const username =
-        "vikingfan" + Math.floor(Math.random() * (999999999999 - 1000) + 1000)
-  const password = Math.floor(Math.random() * (999999999999 - 1000) + 1000).toString()
+  const [ username, password ] = randomCredentials("vikingsfan-");
   await page.keyboard.type(username)
   await page.keyboard.press("Tab")
   await page.keyboard.type(password)
@@ -655,14 +667,12 @@ test.skip('Bitcoin, Lightning, and Liquid payment addresses are generated and pr
   t.end()
 })
 
-test.skip("Can perform internal transfers", async t => {
+test("Can perform internal transfers", async t => {
     const [browser, page] = await openCoinosHome();
 
     // register an account without money
     await page.goto(baseUrl + "register", {waitUntil: "networkidle2"});
-    const username =
-          "vikingfan" + Math.floor(Math.random() * (999999999999 - 1000) + 1000);
-    const password = Math.floor(Math.random() * (999999999999 - 1000) + 1000).toString();
+    const [ username, password ] = randomCredentials("vikingfan-");
     await page.keyboard.type(username);
     await page.keyboard.press("Tab");
     await page.keyboard.type(password);
