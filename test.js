@@ -72,7 +72,7 @@ const openCoinosHome = async () => {
 
 // ### Tests ###
 
-test("Can open homepage", async (t) => {
+test.skip("Can open homepage", async (t) => {
   const [browser, page] = await openCoinosHome();
   await delay(3);
 
@@ -86,7 +86,7 @@ test("Can open homepage", async (t) => {
   t.end();
 });
 
-test("Can create an anonymous account", async (t) => {
+test.skip("Can create an anonymous account", async (t) => {
   const [browser, page] = await openCoinosHome();
   await delay(3);
 
@@ -107,7 +107,7 @@ test("Can create an anonymous account", async (t) => {
   t.end();
 });
 
-test("Can change username and password", async (t) => {
+test.skip("Can change username and password", async (t) => {
   const [browser, page] = await openCoinosHome();
 
   await delay(3);
@@ -202,7 +202,7 @@ test("Can change username and password", async (t) => {
   t.end();
 });
 
-test("Can set, change and remove PIN", async (t) => {
+test.skip("Can set, change and remove PIN", async (t) => {
     const [browser, page] = await openCoinosHome();
 
     // create account and go to settings page
@@ -372,7 +372,7 @@ test.skip("Can register an account", async (t) => {
   t.end();
 });
 
-test("Cannot register account if input fields are invalid", async (t) => {
+test.skip("Cannot register account if input fields are invalid", async (t) => {
   const clickRegister = async () => {
     return new Promise(async (resolve) => {
       const registerButtonSpan = await page.$x(
@@ -487,7 +487,57 @@ test("Cannot register account if input fields are invalid", async (t) => {
   t.end();
 });
 
-test('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
+test("Can refer users", async (t) => {
+    const [browser, page] = await openCoinosHome();
+
+    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"});
+    await page.keyboard.type(adminUsername);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(adminPassword);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    await page.goto(baseUrl + "referral", {waitUntil: "networkidle2"});
+    const createTokenButtons = await page.$x("//span[contains(., 'Generate Raw Token')]");
+    await createTokenButtons[0].click();
+    await delay(0.5);
+    const token = await page.evaluate(() => document.getElementsByTagName("TD")[0].innerHTML);
+    t.ok(
+        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.test(token),
+        "Token successfully generated & matches regexp"
+    );
+
+    await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"});
+    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"});
+    const username =
+          "want2bereferred" + Math.floor(Math.random() * (999999999999 - 1000) + 1000);
+    const password = Math.floor(Math.random() * (999999999999 - 1000) + 1000).toString();
+    await page.keyboard.type(username);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(password);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await delay(1);
+
+    await page.goto(baseUrl + "funding", {waitUntil: "networkidle2"});
+    const enterCodeButtons = await page.$x("//span[contains(., 'Enter Referral Code')]");
+    await enterCodeButtons[0].click();
+    await delay(0.8);
+    await page.keyboard.type(token);
+    const submitCodeButtons = await page.$x("//span[contains(., 'Submit Referral Code')]");
+    await submitCodeButtons[0].click();
+    await delay(0.8);
+
+    let body = await page.evaluate(() => document.body.innerHTML);
+    t.ok(body.search("Your Verification Status: "), "Token can be used to refer user");
+
+    await delay(1);
+    await browser.close();
+    t.end();
+});
+
+test.skip('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
   const [browser,page] = await openCoinosHome()
   await delay(3)
 
@@ -605,7 +655,7 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
   t.end()
 })
 
-test("Can perform internal transfers", async t => {
+test.skip("Can perform internal transfers", async t => {
     const [browser, page] = await openCoinosHome();
 
     // register an account without money
