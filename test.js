@@ -73,6 +73,8 @@ const openCoinosHome = async () => {
 const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
 const numChars = characters.length;
 const randomCredentialLength = 12;
+// future proofing in case password rules are added to coinos
+// this does not actually make the passwords more secure
 const defaultPasswordPrefix = "P@s$w0rd-";
 
 // generate random username and password
@@ -763,6 +765,115 @@ test("Can perform internal transfers", async t => {
     );
 
     await delay(1);
+    await browser.close();
+    t.end();
+});
+
+test("Can create, use, and delete wallets", async t => {
+    const [browser, page] = await openCoinosHome();
+
+    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"});
+    const anonLoginButtons = await page.$x("//span[contains(., 'Use Anonymously')]");
+    await anonLoginButtons[0].click();
+    await delay(6);
+
+    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"});
+    await delay(1);
+
+    const newWalletButtons = await page.$x("//span[contains(., 'New Wallet')]");
+    await newWalletButtons[0].click();
+    await delay(2);
+
+    // enter new wallet creation page
+    let body = await page.evaluate(() => document.body.innerText);
+    if (body.search("Password")) {
+        await page.keyboard.type("password");
+        await page.keyboard.press("Enter");
+        console.log("🛈 Was prompted for password");
+    } else {
+        console.log("🛈 Was not prompted for password");
+    }
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("New Wallet") > -1, "Can enter wallet creation menu");
+
+    // enable Liquid
+    const liquidButtons = await page.$x("//span[contains(., 'Liquid')]");
+    await liquidButtons[0].click();
+    await delay(1);
+
+    // ensure advanced settings work
+    const advancedSettingsButtons = await page.$x("//span[contains(., 'Advanced Settings')]");
+    await advancedSettingsButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Seed") > -1, "Can enable advanced settings");
+
+    await advancedSettingsButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Seed") === -1, "Can disable advanced settings");
+
+    // create wallet
+    const goButtons = await page.$x("//span[contains(., 'Go')]");
+    await goButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("LBTC") > -1, "Currency switched to LBTC");
+
+    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"});
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Liquid Bitcoin") > -1, "New wallet created");
+
+    // attempt to delete wallet - process is intentionally complicated to prevent mistakes
+    const hideButtons = await page.$x("//span[contains(., 'Hide')]");
+    await hideButtons[0].click();
+    await delay(1);
+    let showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]");
+    await showHiddenButtons[0].click();
+    await delay(1);
+    let walletButtons = await page.$x("//button[contains(., 'Bitcoin')]");
+    await walletButtons[1].click();
+    await delay(1);
+    let deleteButtons = await page.$x("//span[contains(., 'Delete')]");
+    await deleteButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Can't delete account while in use") > -1, "Prevented from deleting account in use");
+
+    // can't delete wallet in use, so switch to another one
+    await walletButtons[0].click();
+    await delay(1);
+    const goButtons2 = await page.$x("//span[contains(., 'Go')]");
+    await goButtons2[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("LBTC") === -1 && (body.search("BTC") > -1 || body.search("SAT") > -1),
+        "Can switch between wallets"
+    );
+
+    // try deletion again - it should work this time
+    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"});
+    showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]");
+    await showHiddenButtons[0].click();
+    await delay(1);
+    walletButtons = await page.$x("//button[contains(., 'Bitcoin')]");
+    await walletButtons[1].click();
+    await delay(1);
+    deleteButtons = await page.$x("//span[contains(., 'Delete')]");
+    await deleteButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Can't delete account while in use") === -1, "Can delete account not in use");
+    t.ok(body.search("Liquid Bitcoin") === -1, "Can delete wallets");
+
     await browser.close();
     t.end();
 });
