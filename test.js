@@ -877,3 +877,126 @@ test("Can create, use, and delete wallets", async t => {
     await browser.close();
     t.end();
 });
+
+test("Can use the admin page", async t => {
+    const [browser, page] = await openCoinosHome();
+
+    // try to get into admin page without logging on
+    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"});
+    await delay(6);
+    let body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Access Denied") > -1, "Cannot access admin page without logging in");
+
+    // try to get into admin page as non-admin
+    const [username, password] = randomCredentials("totallyrealadmin-");
+    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"});
+    await page.keyboard.type(username);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(password);
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"});
+    await delay(6);
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Access Denied") > -1, "Cannot access admin page as non-admin");
+
+    // login as admin
+    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"});
+    await page.keyboard.type(adminUsername);
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(adminPassword);
+    await page.keyboard.press("Enter");
+    await delay(1);
+    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"});
+    await delay(6);
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search("Access Denied") === -1, "Can access admin page as admin");
+
+    // try to list users
+    const listUsersButtons = await page.$x("//span[contains(., 'List Users')]");
+    await listUsersButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    // because we created a user earlier & are using admin, we know there's at least 2 users in the system
+    // therefore 0 users = error
+    t.ok(body.search(/[1-9]\d* users since \d{4}-\d{2}-\d{2}/) > -1, "Can list users");
+
+    // try to search for user we created earlier
+    const searchMatchButton = await page.$("#matches");
+    await searchMatchButton.click();
+    await page.keyboard.press("Tab");
+    await page.keyboard.type(username);
+    await listUsersButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search("1 users like: \"" + username + "\"") > -1,
+        "Can search for users"
+    );
+
+    // try to list users with balance
+    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"});
+    await delay(4);
+    const listUsersWithBalanceButtons = await page.$x("//span[contains(., 'Accounts with Balance')]");
+    await listUsersWithBalanceButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    // I asked you to make sure this account has a balance - that's one!
+    t.ok(body.search(/[1-9]\d* accounts since \d{4}-\d{2}-\d{2}/) > -1, "Can list users with balance");
+
+    // try to list referrals
+    const tabs = await page.$$(".v-tab");
+    await tabs[1].click();
+    await delay(1);
+    const listReferralsButtons = await page.$x("//span[contains(., 'List Referrals')]");
+    await listReferralsButtons[0].click();
+    await delay(1);
+
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search(/([1-9]\d*|No) referrals/) > -1, "Can list referrals");
+
+    // try to list transactions
+    await tabs[2].click();
+    await delay(1);
+
+    // these 5 things are basically the same in terms of UI, so I'll use a for loop
+    const keys = ["Payments", "Orders", "Deposits", "Withdrawals", "Invoices"];
+    for (let i = 0; i < keys.length; i++) {
+        // click the button
+        let buttons = await page.$x("//span[contains(., '" + keys[i] + "')]");
+        await buttons[0].click();
+        await delay(1);
+
+        // look for the message
+        body = await page.evaluate(() => document.body.innerText);
+        let pattern = new RegExp("([1-9]\\d*|No) " + keys[i].toLowerCase() + " since \\d{4}-\\d{2}-\\d{2}");
+        t.ok(body.search(pattern) > -1, "Can list " + keys[i].toLowerCase());
+    }
+
+    // finally, summaries
+    await tabs[3].click();
+    await delay(1);
+
+    // try to list transactions (summaries page)
+    let transactionButtons = await page.$x("//span[contains(., 'Transactions')]");
+    await transactionButtons[0].click();
+    await delay(3); // longer because the page warns it could take longer
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(body.search(/([1-9]\d*|No) transactions since \d{4}-\d{2}-\d{2}/) > -1, "Can list transactions");
+
+    // try to list kyc required users
+    let kycRequiredButtons = await page.$x("//span[contains(., 'KYC Required')]");
+    await kycRequiredButtons[0].click();
+    await delay(1);
+    body = await page.evaluate(() => document.body.innerText);
+    t.ok(
+        body.search(/([1-9]\d*|No) kyc flagged users since \d{4}-\d{2}-\d{2} \(max > 2.1M SAT\)/) > -1,
+        "Can list KYC required users"
+    );
+
+    await browser.close();
+    t.end();
+});
