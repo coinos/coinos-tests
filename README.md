@@ -41,7 +41,16 @@ Install [act] on your system (which also requires docker) and then:
 npm run test-act
 ```
 
+### license
+
+This code is [licensed].  Coinos and this repository are free to use for personal use.  Anyone can fork as long as it stays AGPLv3.  
+
+To purchase a commercial license or to inquire about customized or managed instances, please reach out to us at [contact@coinos.io]
+
+
 [Coinos]: https://github.com/coinos
 [act]: https://github.com/nektos/act
 [docker]: https://docs.docker.com/get-docker
 [coinos-server]: https://github.com/coinos/coinos-server
+[licensed]:./LICENSE.md
+[contact@coinos.io]:mailto:contact@coinos.io
