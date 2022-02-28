@@ -590,7 +590,11 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
   const lightningBtn = await page.$x("//button[contains(., 'Lightning')]")
   await lightningBtn[0].click()
   await delay(1)
-  const lightningAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+  let lightningAddress
+  try {
+    lightningAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+  } catch(err) { console.error(err)  }
+  if(!lightningAddress) return t.end('could not retrieve Lightning address')
   t.equal(lightningAddress.length, 263, 'Lightning address generated is 263 characters')
 
   const amountBtn = await page.$x("//button[contains(., 'Amount')]")
