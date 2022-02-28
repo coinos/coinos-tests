@@ -82,13 +82,13 @@ const defaultPasswordPrefix = "P@s$w0rd-"
 // (e.g. if a test fails and I sent sats to one of those accounts I can get them back)
 // DO NOT USE THIS FOR A REAL ACCOUNT
 function randomCredentials(usernamePrefix) {
-    let randomText = ''
-    for (var i = 0; i < randomCredentialLength; i++) {
-        randomText += characters.charAt(Math.floor(Math.random() * numChars))
-    }
-    let username = usernamePrefix + randomText
-    let password = defaultPasswordPrefix + randomText
-    return [username, password]
+  let randomText = ''
+  for (var i = 0; i < randomCredentialLength; i++) {
+    randomText += characters.charAt(Math.floor(Math.random() * numChars))
+  }
+  let username = usernamePrefix + randomText
+  let password = defaultPasswordPrefix + randomText
+  return [username, password]
 }
 
 // ### Tests ###
@@ -223,126 +223,126 @@ test("Can change username and password", async (t) => {
 })
 
 test("Can set, change and remove PIN", async (t) => {
-    const [browser, page] = await openCoinosHome()
+  const [browser, page] = await openCoinosHome()
 
-    // create account and go to settings page
-    const anonButtonSpan = await page.$x(
-        "//span[contains(., 'Use Anonymously')]"
-    )
-    await anonButtonSpan[0].click()
-    await delay(3)
+  // create account and go to settings page
+  const anonButtonSpan = await page.$x(
+      "//span[contains(., 'Use Anonymously')]"
+  )
+  await anonButtonSpan[0].click()
+  await delay(3)
 
-    const userButtonSpan = await page.$x("//span[contains(., 'satoshi')]")
-    await userButtonSpan[0].click()
-    await delay(1)
-    const settingsDiv = await page.$x("//div[contains(., 'Settings')]")
-    await settingsDiv[5].click()
-    await delay(4)
+  const userButtonSpan = await page.$x("//span[contains(., 'satoshi')]")
+  await userButtonSpan[0].click()
+  await delay(1)
+  const settingsDiv = await page.$x("//div[contains(., 'Settings')]")
+  await settingsDiv[5].click()
+  await delay(4)
 
-    let body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("Your public page") > -1,
-        `Setting page loads OK (shows 'Your public page')")`
-    )
+  let body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("Your public page") > -1,
+    `Setting page loads OK (shows 'Your public page')")`
+  )
 
-    // try to set a PIN
-    let pinButtonSpan = await page.$x("//span[contains(., 'Set PIN')]")
-    await pinButtonSpan[0].click()
+  // try to set a PIN
+  let pinButtonSpan = await page.$x("//span[contains(., 'Set PIN')]")
+  await pinButtonSpan[0].click()
 
-    await page.keyboard.press("Tab")
-    await page.keyboard.type("857142")
-    await delay(1)
-    await page.keyboard.type("142857")
+  await page.keyboard.press("Tab")
+  await page.keyboard.type("857142")
+  await delay(1)
+  await page.keyboard.type("142857")
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("PIN mismatch") > -1,
-        `Cannot set PIN when confirmation != original`
-    )
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("PIN mismatch") > -1,
+    `Cannot set PIN when confirmation != original`
+  )
 
-    await page.keyboard.type("857142")
-    await delay(1)
-    await page.keyboard.type("857142")
+  await page.keyboard.type("857142")
+  await delay(1)
+  await page.keyboard.type("857142")
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("PIN Set Successfully!") > -1,
-        `Can set PIN`
-    )
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("PIN Set Successfully!") > -1,
+    `Can set PIN`
+  )
 
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
 
-    // try to change PIN
-    pinButtonSpan = await page.$x("//span[contains(., 'Change PIN')]")
-    await pinButtonSpan[0].click()
+  // try to change PIN
+  pinButtonSpan = await page.$x("//span[contains(., 'Change PIN')]")
+  await pinButtonSpan[0].click()
 
-    await page.keyboard.press("Tab")
-    await page.keyboard.type("142857")
-    await delay(1)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("Wrong PIN, try again") > -1,
-        `Current PIN is required to change PIN`
-    )
+  await page.keyboard.press("Tab")
+  await page.keyboard.type("142857")
+  await delay(1)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("Wrong PIN, try again") > -1,
+    `Current PIN is required to change PIN`
+  )
 
-    // try to change it correctly
-    await page.keyboard.type("857142")
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
-    await page.keyboard.down("Shift")
-    for (var i = 0; i < 7; i++)
-        await page.keyboard.press("Tab")
-    await page.keyboard.up("Shift")
-    await page.keyboard.type("142857")
-    await page.keyboard.type("142857")
+  // try to change it correctly
+  await page.keyboard.type("857142")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.keyboard.down("Shift")
+  for (var i = 0; i < 7; i++)
+      await page.keyboard.press("Tab")
+  await page.keyboard.up("Shift")
+  await page.keyboard.type("142857")
+  await page.keyboard.type("142857")
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("PIN Set Successfully!") > -1,
-        `Can change PIN`
-    )
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("PIN Set Successfully!") > -1,
+    `Can change PIN`
+  )
 
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
 
-    // try to unset PIN
-    pinButtonSpan = await page.$x("//span[contains(., 'Change PIN')]")
-    await pinButtonSpan[0].click()
+  // try to unset PIN
+  pinButtonSpan = await page.$x("//span[contains(., 'Change PIN')]")
+  await pinButtonSpan[0].click()
 
-    await page.keyboard.press("Tab")
-    await page.keyboard.type("142857")
-    await delay(1)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
-    await page.keyboard.press("Enter")
-    await delay(1)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type("142857")
+  await delay(1)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    // I need to press tab 7 times due to a bug in the system
-    for (i = 0; i < 7; i++)
-        await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
+  // I need to press tab 7 times due to a bug in the system
+  for (i = 0; i < 7; i++)
+      await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("PIN Set Successfully!") > -1,
-        `Can unset PIN`
-    )
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("PIN Set Successfully!") > -1,
+    `Can unset PIN`
+  )
 
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
 
-    await delay(1)
-    await browser.close()
-    t.end()
+  await delay(1)
+  await browser.close()
+  t.end()
 })
 
 test.skip("Can register an account", async (t) => {
@@ -506,51 +506,51 @@ test("Cannot register account if input fields are invalid", async (t) => {
 })
 
 test("Can refer users", async (t) => {
-    const [browser, page] = await openCoinosHome()
+  const [browser, page] = await openCoinosHome()
 
-    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
-    await page.keyboard.type(adminUsername)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(adminPassword)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
+  await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
+  await page.keyboard.type(adminUsername)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(adminPassword)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    await page.goto(baseUrl + "referral", {waitUntil: "networkidle2"})
-    const createTokenButtons = await page.$x("//span[contains(., 'Generate Raw Token')]")
-    await createTokenButtons[0].click()
-    await delay(0.5)
-    const token = await page.evaluate(() => document.getElementsByTagName("TD")[0].innerHTML)
-    t.ok(
-        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.test(token),
-        "Token successfully generated & matches regexp"
-    )
+  await page.goto(baseUrl + "referral", {waitUntil: "networkidle2"})
+  const createTokenButtons = await page.$x("//span[contains(., 'Generate Raw Token')]")
+  await createTokenButtons[0].click()
+  await delay(0.5)
+  const token = await page.evaluate(() => document.getElementsByTagName("TD")[0].innerHTML)
+  t.ok(
+    /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.test(token),
+    "Token successfully generated & matches regexp"
+  )
 
-    await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"})
-    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
-    const [ username, password ] = randomCredentials("want2bereferred-")
-    await page.keyboard.type(username)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(password)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
+  await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"})
+  await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
+  const [ username, password ] = randomCredentials("want2bereferred-")
+  await page.keyboard.type(username)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(password)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    await page.goto(baseUrl + "funding", {waitUntil: "networkidle2"})
-    const enterCodeButtons = await page.$x("//span[contains(., 'Enter Referral Code')]")
-    await enterCodeButtons[0].click()
-    await delay(0.8)
-    await page.keyboard.type(token)
-    const submitCodeButtons = await page.$x("//span[contains(., 'Submit Referral Code')]")
-    await submitCodeButtons[0].click()
-    await delay(0.8)
+  await page.goto(baseUrl + "funding", {waitUntil: "networkidle2"})
+  const enterCodeButtons = await page.$x("//span[contains(., 'Enter Referral Code')]")
+  await enterCodeButtons[0].click()
+  await delay(0.8)
+  await page.keyboard.type(token)
+  const submitCodeButtons = await page.$x("//span[contains(., 'Submit Referral Code')]")
+  await submitCodeButtons[0].click()
+  await delay(0.8)
 
-    let body = await page.evaluate(() => document.body.innerHTML)
-    t.ok(body.search("Your Verification Status: "), "Token can be used to refer user")
+  let body = await page.evaluate(() => document.body.innerHTML)
+  t.ok(body.search("Your Verification Status: "), "Token can be used to refer user")
 
-    await delay(1)
-    await browser.close()
-    t.end()
+  await delay(1)
+  await browser.close()
+  t.end()
 })
 
 test('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
@@ -674,333 +674,333 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
 })
 
 test("Can perform internal transfers", async t => {
-    const [browser, page] = await openCoinosHome()
+  const [browser, page] = await openCoinosHome()
 
-    // register an account without money
-    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
-    const [ username, password ] = randomCredentials("vikingfan-")
-    await page.keyboard.type(username)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(password)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
+  // register an account without money
+  await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
+  const [ username, password ] = randomCredentials("vikingfan-")
+  await page.keyboard.type(username)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(password)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
 
-    // login on account with money
-    await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"})
-    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
-    await page.keyboard.type(adminUsername)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(adminPassword)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
+  // login on account with money
+  await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"})
+  await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
+  await page.keyboard.type(adminUsername)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(adminPassword)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    // try to send money from rich to poor
-    const amount = Math.floor(Math.random() * 1000)
+  // try to send money from rich to poor
+  const amount = Math.floor(Math.random() * 1000)
 
-    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-    await page.keyboard.type(username)
-    await page.keyboard.press("Enter")
-    await delay(1)
-    await page.click("input")
-    await delay(0.5)
-    let numpadInput = (await page.$$("input"))[1]
-    await numpadInput.type(amount.toString())
-    await page.keyboard.down("Shift")
-    await page.keyboard.press("Tab")
-    await page.keyboard.up("Shift")
-    await page.keyboard.press("Enter")
-    await delay(1)
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(username)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.click("input")
+  await delay(0.5)
+  let numpadInput = (await page.$$("input"))[1]
+  await numpadInput.type(amount.toString())
+  await page.keyboard.down("Shift")
+  await page.keyboard.press("Tab")
+  await page.keyboard.up("Shift")
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    let sendBtn = await page.$x("//button[contains(., 'Send')]")
-    await sendBtn[0].click()
-    await delay(1)
+  let sendBtn = await page.$x("//button[contains(., 'Send')]")
+  await sendBtn[0].click()
+  await delay(1)
 
-    let body = await page.evaluate(() => document.body.innerHTML)
-    t.ok(
-        body.search("Payment sent!") > -1,
-        "User able to send payment"
-    )
+  let body = await page.evaluate(() => document.body.innerHTML)
+  t.ok(
+    body.search("Payment sent!") > -1,
+    "User able to send payment"
+  )
 
-    // go to other account and check if money was received
-    await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"})
-    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
-    await page.keyboard.type(username)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(password)
-    await page.keyboard.press("Tab")
-    await page.keyboard.press("Enter")
-    await delay(1)
-    await page.goto(baseUrl + "home", {waitUntil: "networkidle2"})
+  // go to other account and check if money was received
+  await page.goto(baseUrl + "logout", {waitUntil: "networkidle2"})
+  await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
+  await page.keyboard.type(username)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(password)
+  await page.keyboard.press("Tab")
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.goto(baseUrl + "home", {waitUntil: "networkidle2"})
 
-    body = await page.evaluate(() => document.body.innerHTML)
-    t.ok(
-        body.search(amount.toString()) > -1,
-        "Money sent to account"
-    )
+  body = await page.evaluate(() => document.body.innerHTML)
+  t.ok(
+    body.search(amount.toString()) > -1,
+    "Money sent to account"
+  )
 
-    // send the money back, so my tester doesn't run out of money
-    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-    await page.keyboard.type(adminUsername)
-    await page.keyboard.press("Enter")
-    await delay(1)
-    await page.click("input")
-    await delay(0.5)
-    numpadInput = (await page.$$("input"))[1]
-    await numpadInput.type(amount.toString())
-    await page.keyboard.down("Shift")
-    await page.keyboard.press("Tab")
-    await page.keyboard.up("Shift")
-    await page.keyboard.press("Enter")
-    await delay(1)
+  // send the money back, so my tester doesn't run out of money
+  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+  await page.keyboard.type(adminUsername)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.click("input")
+  await delay(0.5)
+  numpadInput = (await page.$$("input"))[1]
+  await numpadInput.type(amount.toString())
+  await page.keyboard.down("Shift")
+  await page.keyboard.press("Tab")
+  await page.keyboard.up("Shift")
+  await page.keyboard.press("Enter")
+  await delay(1)
 
-    sendBtn = await page.$x("//button[contains(., 'Send')]")
-    await sendBtn[0].click()
-    await delay(1)
+  sendBtn = await page.$x("//button[contains(., 'Send')]")
+  await sendBtn[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerHTML)
-    t.ok(
-        body.search("Payment sent!") > -1,
-        "User able to return money"
-    )
-    t.ok(
-        body.search(/0\s*<\/div>/) > -1,
-        "Returned money was deducted from user's account"
-    )
+  body = await page.evaluate(() => document.body.innerHTML)
+  t.ok(
+    body.search("Payment sent!") > -1,
+    "User able to return money"
+  )
+  t.ok(
+    body.search(/0\s*<\/div>/) > -1,
+    "Returned money was deducted from user's account"
+  )
 
-    await delay(1)
-    await browser.close()
-    t.end()
+  await delay(1)
+  await browser.close()
+  t.end()
 })
 
 test("Can create, use, and delete wallets", async t => {
-    const [browser, page] = await openCoinosHome()
+  const [browser, page] = await openCoinosHome()
 
-    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
-    const anonLoginButtons = await page.$x("//span[contains(., 'Use Anonymously')]")
-    await anonLoginButtons[0].click()
-    await delay(6)
+  await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
+  const anonLoginButtons = await page.$x("//span[contains(., 'Use Anonymously')]")
+  await anonLoginButtons[0].click()
+  await delay(6)
 
-    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
-    await delay(1)
+  await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
+  await delay(1)
 
-    const newWalletButtons = await page.$x("//span[contains(., 'New Wallet')]")
-    await newWalletButtons[0].click()
-    await delay(2)
+  const newWalletButtons = await page.$x("//span[contains(., 'New Wallet')]")
+  await newWalletButtons[0].click()
+  await delay(2)
 
-    // enter new wallet creation page
-    let body = await page.evaluate(() => document.body.innerText)
-    if (body.search("Password")) {
-        await page.keyboard.type("password")
-        await page.keyboard.press("Enter")
-        console.log("🛈 Was prompted for password")
-    } else {
-        console.log("🛈 Was not prompted for password")
-    }
+  // enter new wallet creation page
+  let body = await page.evaluate(() => document.body.innerText)
+  if (body.search("Password")) {
+    await page.keyboard.type("password")
+    await page.keyboard.press("Enter")
+    console.log("🛈 Was prompted for password")
+  } else {
+    console.log("🛈 Was not prompted for password")
+  }
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("New Wallet") > -1, "Can enter wallet creation menu")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("New Wallet") > -1, "Can enter wallet creation menu")
 
-    // enable Liquid
-    const liquidButtons = await page.$x("//span[contains(., 'Liquid')]")
-    await liquidButtons[0].click()
-    await delay(1)
+  // enable Liquid
+  const liquidButtons = await page.$x("//span[contains(., 'Liquid')]")
+  await liquidButtons[0].click()
+  await delay(1)
 
-    // ensure advanced settings work
-    const advancedSettingsButtons = await page.$x("//span[contains(., 'Advanced Settings')]")
-    await advancedSettingsButtons[0].click()
-    await delay(1)
+  // ensure advanced settings work
+  const advancedSettingsButtons = await page.$x("//span[contains(., 'Advanced Settings')]")
+  await advancedSettingsButtons[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Seed") > -1, "Can enable advanced settings")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Seed") > -1, "Can enable advanced settings")
 
-    await advancedSettingsButtons[0].click()
-    await delay(1)
+  await advancedSettingsButtons[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Seed") === -1, "Can disable advanced settings")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Seed") === -1, "Can disable advanced settings")
 
-    // create wallet
-    const goButtons = await page.$x("//span[contains(., 'Go')]")
-    await goButtons[0].click()
-    await delay(1)
+  // create wallet
+  const goButtons = await page.$x("//span[contains(., 'Go')]")
+  await goButtons[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("LBTC") > -1, "Currency switched to LBTC")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("LBTC") > -1, "Currency switched to LBTC")
 
-    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Liquid Bitcoin") > -1, "New wallet created")
+  await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Liquid Bitcoin") > -1, "New wallet created")
 
-    // attempt to delete wallet - process is intentionally complicated to prevent mistakes
-    const hideButtons = await page.$x("//span[contains(., 'Hide')]")
-    await hideButtons[0].click()
-    await delay(1)
-    let showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
-    await showHiddenButtons[0].click()
-    await delay(1)
-    let walletButtons = await page.$x("//button[contains(., 'Bitcoin')]")
-    await walletButtons[1].click()
-    await delay(1)
-    let deleteButtons = await page.$x("//span[contains(., 'Delete')]")
-    await deleteButtons[0].click()
-    await delay(1)
+  // attempt to delete wallet - process is intentionally complicated to prevent mistakes
+  const hideButtons = await page.$x("//span[contains(., 'Hide')]")
+  await hideButtons[0].click()
+  await delay(1)
+  let showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
+  await showHiddenButtons[0].click()
+  await delay(1)
+  let walletButtons = await page.$x("//button[contains(., 'Bitcoin')]")
+  await walletButtons[1].click()
+  await delay(1)
+  let deleteButtons = await page.$x("//span[contains(., 'Delete')]")
+  await deleteButtons[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Can't delete account while in use") > -1, "Prevented from deleting account in use")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Can't delete account while in use") > -1, "Prevented from deleting account in use")
 
-    // can't delete wallet in use, so switch to another one
-    await walletButtons[0].click()
-    await delay(1)
-    const goButtons2 = await page.$x("//span[contains(., 'Go')]")
-    await goButtons2[0].click()
-    await delay(1)
+  // can't delete wallet in use, so switch to another one
+  await walletButtons[0].click()
+  await delay(1)
+  const goButtons2 = await page.$x("//span[contains(., 'Go')]")
+  await goButtons2[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("LBTC") === -1 && (body.search("BTC") > -1 || body.search("SAT") > -1),
-        "Can switch between wallets"
-    )
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("LBTC") === -1 && (body.search("BTC") > -1 || body.search("SAT") > -1),
+    "Can switch between wallets"
+  )
 
-    // try deletion again - it should work this time
-    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
-    showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
-    await showHiddenButtons[0].click()
-    await delay(1)
-    walletButtons = await page.$x("//button[contains(., 'Bitcoin')]")
-    await walletButtons[1].click()
-    await delay(1)
-    deleteButtons = await page.$x("//span[contains(., 'Delete')]")
-    await deleteButtons[0].click()
-    await delay(1)
+  // try deletion again - it should work this time
+  await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
+  showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
+  await showHiddenButtons[0].click()
+  await delay(1)
+  walletButtons = await page.$x("//button[contains(., 'Bitcoin')]")
+  await walletButtons[1].click()
+  await delay(1)
+  deleteButtons = await page.$x("//span[contains(., 'Delete')]")
+  await deleteButtons[0].click()
+  await delay(1)
 
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Can't delete account while in use") === -1, "Can delete account not in use")
-    t.ok(body.search("Liquid Bitcoin") === -1, "Can delete wallets")
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Can't delete account while in use") === -1, "Can delete account not in use")
+  t.ok(body.search("Liquid Bitcoin") === -1, "Can delete wallets")
 
-    await browser.close()
-    t.end()
+  await browser.close()
+  t.end()
 })
 
 test("Can use the admin page", async t => {
-    const [browser, page] = await openCoinosHome()
+  const [browser, page] = await openCoinosHome()
 
-    // try to get into admin page without logging on
-    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
-    await delay(6)
-    let body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Access Denied") > -1, "Cannot access admin page without logging in")
+  // try to get into admin page without logging on
+  await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
+  await delay(6)
+  let body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Access Denied") > -1, "Cannot access admin page without logging in")
 
-    // try to get into admin page as non-admin
-    const [username, password] = randomCredentials("totallyrealadmin-")
-    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
-    await page.keyboard.type(username)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(password)
-    await page.keyboard.press("Enter")
+  // try to get into admin page as non-admin
+  const [username, password] = randomCredentials("totallyrealadmin-")
+  await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
+  await page.keyboard.type(username)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(password)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
+  await delay(6)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Access Denied") > -1, "Cannot access admin page as non-admin")
+
+  // login as admin
+  await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
+  await page.keyboard.type(adminUsername)
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(adminPassword)
+  await page.keyboard.press("Enter")
+  await delay(1)
+  await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
+  await delay(6)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search("Access Denied") === -1, "Can access admin page as admin")
+
+  // try to list users
+  const listUsersButtons = await page.$x("//span[contains(., 'List Users')]")
+  await listUsersButtons[0].click()
+  await delay(1)
+
+  body = await page.evaluate(() => document.body.innerText)
+  // because we created a user earlier & are using admin, we know there's at least 2 users in the system
+  t.ok(body.search('test_admin') > -1 &&
+    body.search('satoshi-') > -1, "Can list users")
+
+  // try to search for user we created earlier
+  const searchMatchButton = await page.$("#matches")
+  await searchMatchButton.click()
+  await page.keyboard.press("Tab")
+  await page.keyboard.type(username)
+  await listUsersButtons[0].click()
+  await delay(1)
+
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search("1 users like: \"" + username + "\"") > -1,
+    "Can search for users"
+  )
+
+  // try to list users with balance
+  await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
+  await delay(4)
+  const listUsersWithBalanceButtons = await page.$x("//span[contains(., 'Accounts with Balance')]")
+  await listUsersWithBalanceButtons[0].click()
+  await delay(1)
+
+  body = await page.evaluate(() => document.body.innerText)
+  // I asked you to make sure this account has a balance - that's one!
+  t.ok(body.search(/[1-9]\d* accounts since \d{4}-\d{2}-\d{2}/) > -1, "Can list users with balance")
+
+  // try to list referrals
+  const tabs = await page.$$(".v-tab")
+  await tabs[1].click()
+  await delay(1)
+  const listReferralsButtons = await page.$x("//span[contains(., 'List Referrals')]")
+  await listReferralsButtons[0].click()
+  await delay(1)
+
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/([1-9]\d*|No) referrals/) > -1, "Can list referrals")
+
+  // try to list transactions
+  await tabs[2].click()
+  await delay(1)
+
+  // these 5 things are basically the same in terms of UI, so I'll use a for loop
+  const keys = ["Payments", "Orders", "Deposits", "Withdrawals", "Invoices"]
+  for (let i = 0; i < keys.length; i++) {
+    // click the button
+    let buttons = await page.$x("//span[contains(., '" + keys[i] + "')]")
+    await buttons[0].click()
     await delay(1)
-    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
-    await delay(6)
+
+    // look for the message
     body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Access Denied") > -1, "Cannot access admin page as non-admin")
+    let pattern = new RegExp("([1-9]\\d*|No) " + keys[i].toLowerCase() + " since \\d{4}-\\d{2}-\\d{2}")
+    t.ok(body.search(pattern) > -1, "Can list " + keys[i].toLowerCase())
+  }
 
-    // login as admin
-    await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
-    await page.keyboard.type(adminUsername)
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(adminPassword)
-    await page.keyboard.press("Enter")
-    await delay(1)
-    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
-    await delay(6)
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Access Denied") === -1, "Can access admin page as admin")
+  // finally, summaries
+  await tabs[3].click()
+  await delay(1)
 
-    // try to list users
-    const listUsersButtons = await page.$x("//span[contains(., 'List Users')]")
-    await listUsersButtons[0].click()
-    await delay(1)
+  // try to list transactions (summaries page)
+  let transactionButtons = await page.$x("//span[contains(., 'Transactions')]")
+  await transactionButtons[0].click()
+  await delay(3) // longer because the page warns it could take longer
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(body.search(/([1-9]\d*|No) transactions since \d{4}-\d{2}-\d{2}/) > -1, "Can list transactions")
 
-    body = await page.evaluate(() => document.body.innerText)
-    // because we created a user earlier & are using admin, we know there's at least 2 users in the system
-    t.ok(body.search('test_admin') > -1 &&
-      body.search('satoshi-') > -1, "Can list users")
+  // try to list kyc required users
+  let kycRequiredButtons = await page.$x("//span[contains(., 'KYC Required')]")
+  await kycRequiredButtons[0].click()
+  await delay(1)
+  body = await page.evaluate(() => document.body.innerText)
+  t.ok(
+    body.search(/([1-9]\d*|No) kyc flagged users since \d{4}-\d{2}-\d{2} \(max > 2.1M SAT\)/) > -1,
+    "Can list KYC required users"
+  )
 
-    // try to search for user we created earlier
-    const searchMatchButton = await page.$("#matches")
-    await searchMatchButton.click()
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(username)
-    await listUsersButtons[0].click()
-    await delay(1)
-
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search("1 users like: \"" + username + "\"") > -1,
-        "Can search for users"
-    )
-
-    // try to list users with balance
-    await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
-    await delay(4)
-    const listUsersWithBalanceButtons = await page.$x("//span[contains(., 'Accounts with Balance')]")
-    await listUsersWithBalanceButtons[0].click()
-    await delay(1)
-
-    body = await page.evaluate(() => document.body.innerText)
-    // I asked you to make sure this account has a balance - that's one!
-    t.ok(body.search(/[1-9]\d* accounts since \d{4}-\d{2}-\d{2}/) > -1, "Can list users with balance")
-
-    // try to list referrals
-    const tabs = await page.$$(".v-tab")
-    await tabs[1].click()
-    await delay(1)
-    const listReferralsButtons = await page.$x("//span[contains(., 'List Referrals')]")
-    await listReferralsButtons[0].click()
-    await delay(1)
-
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search(/([1-9]\d*|No) referrals/) > -1, "Can list referrals")
-
-    // try to list transactions
-    await tabs[2].click()
-    await delay(1)
-
-    // these 5 things are basically the same in terms of UI, so I'll use a for loop
-    const keys = ["Payments", "Orders", "Deposits", "Withdrawals", "Invoices"]
-    for (let i = 0; i < keys.length; i++) {
-        // click the button
-        let buttons = await page.$x("//span[contains(., '" + keys[i] + "')]")
-        await buttons[0].click()
-        await delay(1)
-
-        // look for the message
-        body = await page.evaluate(() => document.body.innerText)
-        let pattern = new RegExp("([1-9]\\d*|No) " + keys[i].toLowerCase() + " since \\d{4}-\\d{2}-\\d{2}")
-        t.ok(body.search(pattern) > -1, "Can list " + keys[i].toLowerCase())
-    }
-
-    // finally, summaries
-    await tabs[3].click()
-    await delay(1)
-
-    // try to list transactions (summaries page)
-    let transactionButtons = await page.$x("//span[contains(., 'Transactions')]")
-    await transactionButtons[0].click()
-    await delay(3) // longer because the page warns it could take longer
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search(/([1-9]\d*|No) transactions since \d{4}-\d{2}-\d{2}/) > -1, "Can list transactions")
-
-    // try to list kyc required users
-    let kycRequiredButtons = await page.$x("//span[contains(., 'KYC Required')]")
-    await kycRequiredButtons[0].click()
-    await delay(1)
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-        body.search(/([1-9]\d*|No) kyc flagged users since \d{4}-\d{2}-\d{2} \(max > 2.1M SAT\)/) > -1,
-        "Can list KYC required users"
-    )
-
-    await browser.close()
-    t.end()
+  await browser.close()
+  t.end()
 })
