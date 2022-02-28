@@ -923,8 +923,8 @@ test("Can use the admin page", async t => {
 
     body = await page.evaluate(() => document.body.innerText);
     // because we created a user earlier & are using admin, we know there's at least 2 users in the system
-    // therefore 0 users = error
-    t.ok(body.search(/[1-9]\d* users since \d{4}-\d{2}-\d{2}/) > -1, "Can list users");
+    t.ok(body.search('test_admin') > -1 &&
+      body.search('satoshi-') > -1, "Can list users");
 
     // try to search for user we created earlier
     const searchMatchButton = await page.$("#matches");
