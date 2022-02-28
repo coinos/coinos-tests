@@ -31,7 +31,6 @@ using email: ${email}`)
 // ### Deps ###
 const test = require("tape")
 const puppeteer = require("puppeteer")
-const select = require("puppeteer-select")
 const _coin = require('undercoin')
 
 const delay = async (seconds) =>

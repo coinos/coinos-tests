@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "puppeteer": "^10.1.0",
-    "puppeteer-select": "^1.0.3",
     "tap-spec": "^5.0.0",
     "tape": "^5.3.0",
     "undercoin": "0.0.5-b"
