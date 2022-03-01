@@ -555,121 +555,127 @@ test.skip("Can refer users", async (t) => {
 test('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
   const [browser,page] = await openCoinosHome()
   await delay(3)
-
-  const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
-  await buttonSpan[0].click()
-  await delay(6)
-
-  let body = await page.evaluate(() => document.body.innerText )
-
-  t.ok(body.search('No payments yet') > -1, `Anonymous account created OK (displays "No payments yet")`)
-  t.ok(body.search('0.00') > -1, 'New account page shows a 0.00 balance')
-  await delay(2)
-
-  //test payment addresses:
-
-  await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
-
-  const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
-  await bitcoinBtn[0].click()
-  await delay(1)
-  const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
-  t.ok(_coin.isSegwit(bitcoinAddress), 'Bitcoin address generated is a valid Segwit address')
-
-  await delay(2)
-
-  const liquidBtn = await page.$x("//button[contains(., 'Liquid')]")
-  await liquidBtn[0].click()
-  await delay(1)
-  const liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
-  t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')
-
-  await delay(2)
-
-  const lightningBtn = await page.$x("//button[contains(., 'Lightning')]")
-  await lightningBtn[0].click()
-  await delay(1)
-  let lightningAddress
   try {
-    lightningAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
-  } catch(err) { console.error(err)  }
-  if(!lightningAddress) return t.end('could not retrieve Lightning address')
-  t.equal(lightningAddress.length, 263, 'Lightning address generated is 263 characters')
-
-  const amountBtn = await page.$x("//button[contains(., 'Amount')]")
-  await amountBtn[0].click()
-  await delay(1)
-  await page.keyboard.type("10")
-  const doneBtn = await page.$x("//button[contains(., 'Done')]")
-  await doneBtn[0].click()
-  await delay(1)
-
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search("10") > -1, 'Amount incorporated into address')
-  const lightningInvoice1 = await page.evaluate(() => document.getElementsByClassName('body-1')[2].innerHTML)
-  t.ok(lightningInvoice1.length >= 263, 'Lightning invoice generated is at least 263 characters')
-
-  const checkoutBtn = await page.$x("//button[contains(., 'Checkout')]")
-  await checkoutBtn[0].click()
-  await delay(1)
-
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search("10") > -1, 'Amount incorporated into invoice')
-  const lightningInvoice2 = await page.evaluate(() => document.getElementsByClassName('body-1')[2].innerHTML)
-  t.equal(lightningInvoice2, lightningInvoice1, 'Checkout page shows correct invoice')
-
-  const tipBtn = await page.$x("//button[contains(., 'Add Tip')]")
-  await tipBtn[0].click()
-  await delay(1)
-  const twentyBtn = await page.$x("//button[contains(., '20%')]")
-  await twentyBtn[0].click()
-  await delay(1)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search("12") > -1 || body.search(/10.*\+2/) > -1, 'Tip incorporated into amount')
-
-  // go to a new account
-  await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
-  const [ username, password ] = randomCredentials("vikingsfan-")
-  await page.keyboard.type(username)
-  await page.keyboard.press("Tab")
-  await page.keyboard.type(password)
-  await page.keyboard.press("Tab")
-  await page.keyboard.press("Enter")
-  await delay(1)
-
-  // Test that all addresses work internally
-  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-  await page.keyboard.type(bitcoinAddress)
-  await page.keyboard.press("Enter")
-  await delay(1)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Bitcoin address should be detected as coinos user')
-
-  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-  await page.keyboard.type(liquidAddress)
-  await page.keyboard.press("Enter")
-  await delay(1)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Liquid address should be detected as coinos user')
-
-  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-  await page.keyboard.type(lightningAddress)
-  await page.keyboard.press("Enter")
-  await delay(1)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Lightning address should be detected as coinos user')
-
-  await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
-  await page.keyboard.type(lightningInvoice1)
-  await page.keyboard.press("Enter")
-  await delay(2)
-  body = await page.evaluate(() => document.body.innerText)
-  t.ok(body.search(/Sending to.*satoshi/) > -1, 'Lightning invoice should be detected as coinos user')
-  t.ok(body.search("10") > -1, 'Amount in invoice detected correctly')
-
-  await delay(2)
-  await browser.close()
-  t.end()
+    const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
+    await buttonSpan[0].click()
+    await delay(6)
+  
+    let body = await page.evaluate(() => document.body.innerText )
+  
+    t.ok(body.search('No payments yet') > -1, `Anonymous account created OK (displays "No payments yet")`)
+    t.ok(body.search('0.00') > -1, 'New account page shows a 0.00 balance')
+    await delay(2)
+  
+    //test payment addresses:
+  
+    await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
+  
+    const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
+    await bitcoinBtn[0].click()
+    await delay(1)
+    const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+    t.ok(_coin.isSegwit(bitcoinAddress), 'Bitcoin address generated is a valid Segwit address')
+  
+    await delay(2)
+  
+    const liquidBtn = await page.$x("//button[contains(., 'Liquid')]")
+    await liquidBtn[0].click()
+    await delay(1)
+    const liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+    t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')
+  
+    await delay(2)
+  
+    const lightningBtn = await page.$x("//button[contains(., 'Lightning')]")
+    await lightningBtn[0].click()
+    await delay(1)
+    let lightningAddress
+    try {
+      lightningAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+    } catch(err) { console.error(err)  }
+    if(!lightningAddress) return t.end('could not retrieve Lightning address')
+    t.ok(lightningAddress.length < 264 && 
+      lightningAddress.length > 189, 'Lightning address generated has expected # of characters')
+  
+    const amountBtn = await page.$x("//button[contains(., 'Amount')]")
+    await amountBtn[0].click()
+    await delay(1)
+    await page.keyboard.type("10")
+    const doneBtn = await page.$x("//button[contains(., 'Done')]")
+    await doneBtn[0].click()
+    await delay(1)
+  
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search("10") > -1, 'Amount incorporated into address')
+    const lightningInvoice1 = await page.evaluate(() => document.getElementsByClassName('body-1')[2].innerHTML)
+    t.ok(lightningInvoice1.length >= 263, 'Lightning invoice generated is at least 263 characters')
+  
+    const checkoutBtn = await page.$x("//button[contains(., 'Checkout')]")
+    await checkoutBtn[0].click()
+    await delay(1)
+  
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search("10") > -1, 'Amount incorporated into invoice')
+    const lightningInvoice2 = await page.evaluate(() => document.getElementsByClassName('body-1')[2].innerHTML)
+    t.equal(lightningInvoice2, lightningInvoice1, 'Checkout page shows correct invoice')
+  
+    const tipBtn = await page.$x("//button[contains(., 'Add Tip')]")
+    await tipBtn[0].click()
+    await delay(1)
+    const twentyBtn = await page.$x("//button[contains(., '20%')]")
+    await twentyBtn[0].click()
+    await delay(1)
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search("12") > -1 || body.search(/10.*\+2/) > -1, 'Tip incorporated into amount')
+  
+    // go to a new account
+    await page.goto(baseUrl + "register", {waitUntil: "networkidle2"})
+    const [ username, password ] = randomCredentials("vikingsfan-")
+    await page.keyboard.type(username)
+    await page.keyboard.press("Tab")
+    await page.keyboard.type(password)
+    await page.keyboard.press("Tab")
+    await page.keyboard.press("Enter")
+    await delay(1)
+  
+    // Test that all addresses work internally
+    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+    await page.keyboard.type(bitcoinAddress)
+    await page.keyboard.press("Enter")
+    await delay(1)
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search(/Sending to.*satoshi/) > -1, 'Bitcoin address should be detected as coinos user')
+  
+    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+    await page.keyboard.type(liquidAddress)
+    await page.keyboard.press("Enter")
+    await delay(1)
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search(/Sending to.*satoshi/) > -1, 'Liquid address should be detected as coinos user')
+  
+    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+    await page.keyboard.type(lightningAddress)
+    await page.keyboard.press("Enter")
+    await delay(1)
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search(/Sending to.*satoshi/) > -1, 'Lightning address should be detected as coinos user')
+  
+    await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
+    await page.keyboard.type(lightningInvoice1)
+    await page.keyboard.press("Enter")
+    await delay(2)
+    body = await page.evaluate(() => document.body.innerText)
+    t.ok(body.search(/Sending to.*satoshi/) > -1, 'Lightning invoice should be detected as coinos user')
+    t.ok(body.search("10") > -1, 'Amount in invoice detected correctly')
+  
+    await delay(2)
+    await browser.close()
+    t.end()
+  } catch (error) { 
+    console.error(error)
+    await browser.close()
+    t.end('test ended early with error') 
+  }
 })
 
 test("Can perform internal transfers", async t => {
@@ -881,7 +887,7 @@ test("Can create, use, and delete wallets", async t => {
   t.end()
 })
 
-test("Can use the admin page", async t => {
+test.skip("Can use the admin page", async t => {
   const [browser, page] = await openCoinosHome()
 
   try {
