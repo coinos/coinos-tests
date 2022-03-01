@@ -151,7 +151,7 @@ test("Can change username and password", async (t) => {
   let body = await page.evaluate(() => document.body.innerText)
   t.ok(
     body.search("Your public page") > -1,
-    `Setting page loads OK (shows 'Your public page')")`
+    `Setting page loads OK (shows 'Your public page')"`
   )
 
   await page.focus("input")
@@ -925,20 +925,6 @@ test("Can use the admin page", async t => {
     // because we created a user earlier & are using admin, we know there's at least 2 users in the system
     t.ok(body.search('test_admin') > -1 &&
       body.search('satoshi-') > -1, "Can list users")
-  
-    // try to search for user we created earlier
-    const searchMatchButton = await page.$("#matches")
-    await searchMatchButton.click()
-    await page.keyboard.press("Tab")
-    await page.keyboard.type(username)
-    await listUsersButtons[0].click()
-    await delay(1)
-  
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-      body.search("1 users like: \"" + username + "\"") > -1,
-      "Can search for users"
-    )
   
     // try to list users with balance
     await page.goto(baseUrl + "admin", {waitUntil: "networkidle2"})
