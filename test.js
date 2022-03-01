@@ -504,7 +504,7 @@ test("Cannot register account if input fields are invalid", async (t) => {
   t.end()
 })
 
-test("Can refer users", async (t) => {
+test.skip("Can refer users", async (t) => {
   const [browser, page] = await openCoinosHome()
 
   await page.goto(baseUrl + "login", {waitUntil: "networkidle2"})
