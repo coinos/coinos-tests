@@ -1,6 +1,6 @@
 {
   "name": "coinos-tests",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Integration test for Coinos",
   "scripts": {
     "test": "tape test.js | tap-arc",

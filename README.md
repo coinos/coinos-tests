@@ -41,6 +41,17 @@ Install [act] on your system (which also requires docker) and then:
 npm run test-act
 ```
 
+#### build docker image (not required)
+
+To build the docker image do: 
+
+```bash
+docker build -t coinos-tests:v0.0.3 .
+```
+
+where v0.0.3 is current version of package.json as of your latest commit.
+
+
 ### license
 
 This code is [licensed].  Coinos and this repository are free to use for personal use.  Anyone can fork as long as it stays AGPLv3.  

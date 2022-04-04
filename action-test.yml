@@ -2,10 +2,10 @@
 
 jobs:
   runTestLocal:
-    container: drschwabe/coinos-tests:v2
+    container: drschwabe/coinos-tests:v0.0.3
     name: Headless Puppeteer Integration Test (Local)
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name : coinos-tests
-      run : npm run test-headless
+      run : cd /coinos-tests; npm run test-headless
