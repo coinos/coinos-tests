@@ -577,10 +577,11 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
     //test payment addresses:
   
     await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
-  
+    await delay(2)
+
     const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
     await bitcoinBtn[0].click()
-    await delay(1)
+    await delay(3)
     const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
     t.ok(_coin.isSegwit(bitcoinAddress), 'Bitcoin address generated is a valid Segwit address')
   
