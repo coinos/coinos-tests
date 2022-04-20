@@ -2,7 +2,7 @@
 
 jobs:
   runTestLocal:
-    container: drschwabe/coinos-tests:v0.0.3
+    container: drschwabe/coinos-tests:v0.0.4
     name: Headless Puppeteer Integration Test (Local)
     runs-on: ubuntu-latest
     steps:
