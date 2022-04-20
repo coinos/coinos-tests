@@ -560,6 +560,7 @@ test.skip("Can refer users", async (t) => {
 })
 
 test('Bitcoin, Lightning, and Liquid payment addresses are generated and properly detected', async t => {
+  t.plan(15)
   const [browser,page] = await openCoinosHome()
   await delay(3)
   try {
@@ -588,8 +589,18 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
     const liquidBtn = await page.$x("//button[contains(., 'Liquid')]")
     await liquidBtn[0].click()
     await delay(1)
-    const liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
-    t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')
+
+    const liquidAddressContainer = await page.evaluate(() => document.getElementsByClassName('body-1'))
+    if(!liquidAddressContainer) console.warn('no container loaded for Liquid address')
+    let liquidAddress
+    if(liquidAddressContainer.length) {
+      liquidAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
+    }
+    if(liquidAddress) {
+      t.equal(liquidAddress.length, 80, 'Liquid address generated is 80 characters')
+    } else {
+      t.fail('could not retrieve Liquid address')
+    }
   
     await delay(2)
   
@@ -597,13 +608,23 @@ test('Bitcoin, Lightning, and Liquid payment addresses are generated and properl
     await lightningBtn[0].click()
     await delay(1)
     let lightningAddress
-    try {
+    const lightningAddressContainer = await page.evaluate(() => document.getElementsByClassName('body-1'))
+    if(!lightningAddressContainer) console.warn('no container loaded for Lightning address')
+    if(lightningAddressContainer.length) {
       lightningAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
-    } catch(err) { console.error(err)  }
-    if(!lightningAddress) throw 'could not retrieve Lightning address'
-    t.ok(lightningAddress.length < 264 && 
+    }
+    if(!lightningAddress) console.warn('could not retrieve Lightning address')
+    t.ok(lightningAddress && lightningAddress.length < 264 && 
       lightningAddress.length > 189, 'Lightning address generated has expected # of characters')
   
+
+    if(!lightningAddress || !liquidAddress || !bitcoinAddress) {
+      await browser.close()
+      return t.end('ending test early since we do not have functional wallet(s)')
+      //note: throwing here doesn't seem to stop the next test from running
+    }
+
+    //check Lightning amount and invoice functionality: 
     const amountBtn = await page.$x("//button[contains(., 'Amount')]")
     await amountBtn[0].click()
     await delay(1)
@@ -725,6 +746,9 @@ test("Can perform internal transfers", async t => {
     await delay(1)
 
     let sendBtn = await page.$x("//button[contains(., 'Send')]")
+    if(!sendBtn.length) {
+      throw 'no Send button'
+    }
     await sendBtn[0].click()
     await delay(1)
 
@@ -852,6 +876,9 @@ test("Can create, use, and delete wallets", async t => {
 
     // attempt to delete wallet - process is intentionally complicated to prevent mistakes
     const hideButtons = await page.$x("//span[contains(., 'Hide')]")
+    if(!hideButtons.length) {
+      throw 'no hideButtons'
+    }
     await hideButtons[0].click()
     await delay(1)
     let showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
