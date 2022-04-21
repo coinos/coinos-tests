@@ -32,9 +32,7 @@ using email: ${email}`)
 const test = require("tape")
 const puppeteer = require("puppeteer")
 const _coin = require('undercoin')
-
-const delay = async (seconds) =>
-  await new Promise((r) => setTimeout(r, seconds ? seconds * 1000 : 1000))
+const delay = require('delay')
 
 // Function to setup/launch Puppeteer and open Coinos homepage:
 const openCoinosHome = async () => {
