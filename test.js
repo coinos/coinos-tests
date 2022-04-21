@@ -32,8 +32,10 @@ using email: ${email}`)
 const test = require("tape")
 const puppeteer = require("puppeteer")
 const _coin = require('undercoin')
-const delay = require('delay')
 const log = console.log
+
+const delay = async (seconds) =>
+  await new Promise((r) => setTimeout(r, seconds ? seconds * 1000 : 1000))
 
 // Function to setup/launch Puppeteer and open Coinos homepage:
 const openCoinosHome = async () => {
@@ -565,15 +567,14 @@ test('Lightning address is generated ok', async t => {
     const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
     await buttonSpan[0].click()
     log('wait 4 seconds...')
-    await delay(4000)
+    await delay(4)
 
     await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
     log('wait 5 seconds...')
-    await delay(5000)
+    await delay(5)
 
     let lightningAddress
     const lightningAddressContainer = await page.evaluate(() => document.getElementsByClassName('body-1')[0])
-    debugger
     if(!lightningAddressContainer) console.warn('no container loaded for Lightning address')
     log('lightningAddressContainer:' + lightningAddressContainer)
     if(lightningAddressContainer) {
@@ -595,38 +596,28 @@ test('Lightning address is generated ok', async t => {
 
 test('Bitcoin address is generated ok', async t => {
   const [browser,page] = await openCoinosHome()
-  await delay(3000)
+  await delay(3)
   try {
     const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
     await buttonSpan[0].click()
     log('wait 5 seconds...')
-    await delay(5000)
-  
-    let body = await page.evaluate(() => document.body.innerText )
-  
-    log('Anonymous account created OK?')
-    t.ok(body.search('No payments yet') > -1, `Anonymous account created OK (displays "No payments yet")`)
-    log('New account page shows a 0.00 balance')
-    t.ok(body.search('0.00') > -1, 'New account page shows a 0.00 balance')
-    log('wait 2 seconds...')
-    await delay(2000)
-  
-    //test payment addresses:
-  
+    await delay(5)
+
+    //test address:
     await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
     log('wait 2 seconds...')
-    await delay(2000)
+    await delay(2)
 
     const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
     await bitcoinBtn[0].click()
     log('wait 3 seconds...')
-    await delay(3000)
+    await delay(3)
     const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
     log('Bitcoin address generated is a valid Segwit address?')
     t.ok(_coin.isSegwit(bitcoinAddress), 'Bitcoin address generated is a valid Segwit address')
     
     log('wait 2 seconds and close test...')
-    await delay(2000)
+    await delay(2)
     await browser.close()
     t.end()
   } catch (error) { 
@@ -678,27 +669,28 @@ test('Liquid address is generated ok', async t => {
     t.end('test ended early with error') 
   }    
 })
+
 test("Lightning amount and invoice functionality", async t => {
   const [browser,page] = await openCoinosHome()
-  await delay(3000)
+  await delay(3)
   try {
     const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
     await buttonSpan[0].click()
     log('wait 3 seconds...')
-    await delay(3000)
+    await delay(3)
   
     await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
     log('wait 4 seconds...')
-    await delay(4000)
+    await delay(4)
   
     //check Lightning amount and invoice functionality: 
     const amountBtn = await page.$x("//button[contains(., 'Amount')]")
     await amountBtn[0].click()
-    await delay(1000)
+    await delay(1)
     await page.keyboard.type("10")
     const doneBtn = await page.$x("//button[contains(., 'Done')]")
     await doneBtn[0].click()
-    await delay(1000)
+    await delay(1)
   
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("10") > -1, 'Amount incorporated into address')
@@ -707,7 +699,7 @@ test("Lightning amount and invoice functionality", async t => {
   
     const checkoutBtn = await page.$x("//button[contains(., 'Show QR')]")
     await checkoutBtn[0].click()
-    await delay(1000)
+    await delay(1)
   
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("10") > -1, 'Amount incorporated into invoice')
@@ -716,10 +708,10 @@ test("Lightning amount and invoice functionality", async t => {
   
     const tipBtn = await page.$x("//button[contains(., 'Add Tip')]")
     await tipBtn[0].click()
-    await delay(1000)
+    await delay(1)
     const twentyBtn = await page.$x("//button[contains(., '20%')]")
     await twentyBtn[0].click()
-    await delay(1000)
+    await delay(1)
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("12") > -1 || body.search(/10.*\+2/) > -1, 'Tip incorporated into amount')
   
@@ -734,22 +726,22 @@ test("Lightning amount and invoice functionality", async t => {
 
 test.skip("Test that addresses work internally", async t => {
   const [browser,page] = await openCoinosHome()
-  await delay(3000)
+  await delay(3)
   try {
     const buttonSpan = await page.$x("//span[contains(., 'Use Anonymously')]")
     await buttonSpan[0].click()
     log('wait 3 seconds...')
-    await delay(3000)
+    await delay(3)
 
     //Get a Bitcoin address:
     await page.goto(baseUrl + 'receive', { waitUntil: 'networkidle2' })
     log('wait 2 seconds...')
-    await delay(2000)
+    await delay(2)
 
     const bitcoinBtn = await page.$x("//button[contains(., 'Bitcoin')]")
     await bitcoinBtn[0].click()
     log('wait 3 seconds...')
-    await delay(3000)
+    await delay(3)
     const bitcoinAddress = await page.evaluate(() => document.getElementsByClassName('body-1')[0].innerHTML)
 
     // go to a new account
@@ -761,18 +753,18 @@ test.skip("Test that addresses work internally", async t => {
     await page.keyboard.press("Tab")
     await page.keyboard.press("Enter")
     log('wait 4 seconds...')
-    await delay(4000)
+    await delay(4)
 
     // Test that all addresses work internally
     await page.goto(baseUrl + "send", {waitUntil: "networkidle2"})
     await page.keyboard.type(bitcoinAddress)
     await page.keyboard.press("Enter")
     log('wait 5 seconds...')
-    await delay(5000)
+    await delay(5)
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search(/Sending to.*satoshi/) > -1, 'Bitcoin address should be detected as coinos user')
 
-    await delay(2000)
+    await delay(2)
     await browser.close()
     t.end()
   } catch (error) { 
@@ -783,7 +775,7 @@ test.skip("Test that addresses work internally", async t => {
 })
 
 
-test("Can perform internal transfers", async t => {
+test.skip("Can perform internal transfers", async t => {
   const [browser, page] = await openCoinosHome()
   try {
     // register an account without money
@@ -891,7 +883,7 @@ test("Can perform internal transfers", async t => {
   }    
 })
 
-test("Can create, use, and delete wallets", async t => {
+test("Can create wallets", async t => {
   const [browser, page] = await openCoinosHome()
   //t.timeoutAfter(20000)
   try {
@@ -920,15 +912,21 @@ test("Can create, use, and delete wallets", async t => {
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("New Wallet") > -1, "Can enter wallet creation menu")
 
+    log('wait 3 seconds...')
+    await delay(3)
+
     // enable Liquid
     const liquidButtons = await page.$x("//span[contains(., 'Liquid')]")
+
     await liquidButtons[0].click()
-    await delay(1)
+    log('wait 5 seconds...')
+    await delay(5)
 
     // ensure advanced settings work
     const advancedSettingsButtons = await page.$x("//span[contains(., 'Advanced Settings')]")
     await advancedSettingsButtons[0].click()
-    await delay(1)
+    log('wait 5 seconds...')
+    await delay(5)
 
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("Seed") > -1, "Can enable advanced settings")
@@ -942,63 +940,22 @@ test("Can create, use, and delete wallets", async t => {
     // create wallet
     const goButtons = await page.$x("//span[contains(., 'Go')]")
     await goButtons[0].click()
-    await delay(1)
+    log('wait 5 seconds...')
+    await delay(5)
 
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("LBTC") > -1, "Currency switched to LBTC")
 
+    log('wait 5 seconds...')
+    await delay(5)
+
     await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
+
+    log('wait 5 seconds...')
+    await delay(5)
+
     body = await page.evaluate(() => document.body.innerText)
     t.ok(body.search("Liquid Bitcoin") > -1, "New wallet created")
-
-    // attempt to delete wallet - process is intentionally complicated to prevent mistakes
-    const hideButtons = await page.$x("//span[contains(., 'Hide')]")
-    if(!hideButtons.length) {
-      throw 'no hideButtons'
-    }
-    await hideButtons[0].click()
-    await delay(1)
-    let showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
-    await showHiddenButtons[0].click()
-    await delay(1)
-    let walletButtons = await page.$x("//button[contains(., 'Bitcoin')]")
-    await walletButtons[1].click()
-    await delay(1)
-    let deleteButtons = await page.$x("//span[contains(., 'Delete')]")
-    await deleteButtons[0].click()
-    await delay(1)
-
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Can't delete account while in use") > -1, "Prevented from deleting account in use")
-
-    // can't delete wallet in use, so switch to another one
-    await walletButtons[0].click()
-    await delay(1)
-    const goButtons2 = await page.$x("//span[contains(., 'Go')]")
-    await goButtons2[0].click()
-    await delay(1)
-
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(
-      body.search("LBTC") === -1 && (body.search("BTC") > -1 || body.search("SAT") > -1),
-      "Can switch between wallets"
-    )
-
-    // try deletion again - it should work this time
-    await page.goto(baseUrl + "wallets", {waitUntil: "networkidle2"})
-    showHiddenButtons = await page.$x("//span[contains(., 'Show Hidden')]")
-    await showHiddenButtons[0].click()
-    await delay(1)
-    walletButtons = await page.$x("//button[contains(., 'Bitcoin')]")
-    await walletButtons[1].click()
-    await delay(1)
-    deleteButtons = await page.$x("//span[contains(., 'Delete')]")
-    await deleteButtons[0].click()
-    await delay(1)
-
-    body = await page.evaluate(() => document.body.innerText)
-    t.ok(body.search("Can't delete account while in use") === -1, "Can delete account not in use")
-    t.ok(body.search("Liquid Bitcoin") === -1, "Can delete wallets")
 
     await browser.close()
     t.end()

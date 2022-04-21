@@ -8,7 +8,6 @@
     "test-act": "act --workflows ./action-test.yml --job runTestLocal"
   },
   "dependencies": {
-    "delay": "5.0.0",
     "puppeteer": "13.1.2",
     "tap-arc": "0.1.2",
     "tape": "5.5.3",
