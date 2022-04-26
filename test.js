@@ -65,6 +65,7 @@ const openCoinosHome = async () => {
     )
     await page.goto(baseUrl, {
       waitUntil: "networkidle2",
+      timeout: 60000,
     })
     resolve([browser, page])
   })
