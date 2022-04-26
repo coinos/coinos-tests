@@ -883,7 +883,7 @@ test.skip("Can perform internal transfers", async t => {
   }    
 })
 
-test("Can create wallets", async t => {
+test.skip("Can create wallets", async t => {
   const [browser, page] = await openCoinosHome()
   //t.timeoutAfter(20000)
   try {
